@@ -1,5 +1,5 @@
-name: Testing with devbox
-run-name: ${{ github.actor }} DevBox Demo
+name: Continious Integration Pipeline
+run-name: "RSpec ${{github.ref_name}}@${{github.sha}} #${{github.run_attempt}}"
 
 on: [push]
 
@@ -10,7 +10,7 @@ permissions:
   pull-requests: write
 
 jobs:
-  test:
+  run-specs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
