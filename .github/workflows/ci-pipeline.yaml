@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2
 
       - name: Install Devbox
         uses: jetify-com/devbox-install-action@v0.14.0
@@ -26,7 +26,7 @@ jobs:
         run: devbox run test --output junit
 
       - name: Publish Test Results
-        uses: EnricoMi/publish-unit-test-result-action@3a74b2957438d0b6e2e61d67b05318aa25c9e6c6 # v2.20.0
+        uses: EnricoMi/publish-unit-test-result-action@v2.20.0
         if: always()
         with:
           check_run: false
