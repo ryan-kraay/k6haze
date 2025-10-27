@@ -5,7 +5,7 @@ Describe "Example specfile"
     }
 
     add() {
-      echo "$1 + $2 + 1" | bc
+      echo "$1 + $2" | bc
     }
 
     It "puts greeting, but not implemented"
