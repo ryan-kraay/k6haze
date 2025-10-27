@@ -18,6 +18,9 @@ jobs:
 
       - name: Install Devbox
         uses: jetify-com/devbox-install-action@v0.14.0
+        with:
+          enable-cache: 'true'
+          devbox-version: '0.16.0'
 
       - name: Run Unit Tests
         run: devbox run test --output junit
