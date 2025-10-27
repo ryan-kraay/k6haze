@@ -1,0 +1,34 @@
+name: Continious Integration Pipeline
+run-name: "RSpec ${{github.ref_name}} #${{github.run_attempt}}"
+
+on: [push]
+
+permissions:
+  # Needed by junit-report
+  checks: write
+  # Needed by EncricoMi
+  pull-requests: write
+
+jobs:
+  run-specs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Devbox
+        uses: jetify-com/devbox-install-action@v0.14.0
+        with:
+          enable-cache: 'true'
+          devbox-version: '0.16.0'
+
+      - name: Run Unit Tests
+        run: devbox run test --output junit
+
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@3a74b2957438d0b6e2e61d67b05318aa25c9e6c6 # v2.20.0
+        if: always()
+        with:
+          check_run: false
+          files: |
+            report/*.xml
