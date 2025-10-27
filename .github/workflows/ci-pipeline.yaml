@@ -1,5 +1,5 @@
 name: Continious Integration Pipeline
-run-name: "RSpec ${{github.ref_name}}@${{github.sha}} #${{github.run_attempt}}"
+run-name: "RSpec ${{github.ref_name}} #${{github.run_attempt}}"
 
 on: [push]
 
