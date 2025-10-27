@@ -1,0 +1,31 @@
+name: Testing with devbox
+run-name: ${{ github.actor }} DevBox Demo
+
+on: [push]
+
+permissions:
+  # Needed by junit-report
+  checks: write
+  # Needed by EncricoMi
+  pull-requests: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Devbox
+        uses: jetify-com/devbox-install-action@v0.14.0
+
+      - name: Run Unit Tests
+        run: devbox run test --output junit
+
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@3a74b2957438d0b6e2e61d67b05318aa25c9e6c6 # v2.20.0
+        if: always()
+        with:
+          check_run: false
+          files: |
+            reports/*.xml
