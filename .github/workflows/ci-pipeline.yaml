@@ -28,4 +28,4 @@ jobs:
         with:
           check_run: false
           files: |
-            reports/*.xml
+            report/*.xml
