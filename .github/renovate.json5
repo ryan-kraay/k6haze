@@ -10,10 +10,10 @@
     ':enablePreCommit',
     ':automergeDigest',
     ':automergeBranch',
-    'github>CowDogMoo/Walls-of-Excellence//.github/renovate/autoMerge.json5',
-    'github>CowDogMoo/Walls-of-Excellence//.github/renovate/commitMessage.json5',
-    'github>CowDogMoo/Walls-of-Excellence//.github/renovate/labels.json5',
-    'github>CowDogMoo/Walls-of-Excellence//.github/renovate/semanticCommits.json5',
+    'github>ryan-kraay/k6haze//.github/renovate/autoMerge.json5',
+    'github>ryan-kraay/k6haze//.github/renovate/commitMessage.json5',
+    'github>ryan-kraay/k6haze//.github/renovate/labels.json5',
+    'github>ryan-kraay/k6haze//.github/renovate/semanticCommits.json5',
     'helpers:pinGitHubActionDigests',
   ],
   dependencyDashboardLabels: [
@@ -31,6 +31,12 @@
   platformAutomerge: true,
   'pre-commit': {
     enabled: true,
+  },
+  devbox: {
+    managerFilePatterns: [
+        "/^\\.github/devbox\\.json$/",
+        "/^devbox-plugins/common/plugin\\.json$/",
+    ],
   },
   flux: {
     managerFilePatterns: [
