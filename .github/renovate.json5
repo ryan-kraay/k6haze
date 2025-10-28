@@ -34,7 +34,7 @@
   },
   devbox: {
     managerFilePatterns: [
-        "/^.github/devbox\\.json$/",
+        "/^\\.github/devbox\\.json$/",
         "/^devbox-plugins/common/plugin\\.json$/",
     ],
   },
