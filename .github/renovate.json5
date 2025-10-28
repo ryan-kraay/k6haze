@@ -1,6 +1,6 @@
 {
   $schema: 'https://docs.renovatebot.com/renovate-schema.json',
-  gitAuthor: 'cowdogmoo-renovate-bot <157187596+cowdogmoo-renovate-bot[bot]@users.noreply.github.com>',
+  gitAuthor: 'rk-rosie-bot <240782710+rk-rosie-bot[bot]@users.noreply.github.com>',
   extends: [
     'config:recommended',
     'docker:enableMajor',
