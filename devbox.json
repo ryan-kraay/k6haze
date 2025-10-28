@@ -4,6 +4,10 @@
     "gitsign@0.13.0",
     "cosign@2.6.1"
   ],
+  "env": {
+    // avoid the need to choose our oauth when using sigstore
+    "GITSIGN_CONNECTOR_ID": "https://github.com/login/oauth"
+  },
   "shell": {
     "init_hook": [
       "echo 'Welcome to devbox!' > /dev/null"
