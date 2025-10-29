@@ -55,6 +55,7 @@
     ],
   },
   customManagers: [
+    // docs: https://docs.renovatebot.com/modules/manager/regex/
     {
       customType: 'regex',
       description: 'Devbox Installed Version',
@@ -62,7 +63,7 @@
         '/^\\.github/workflows/ci-pipeline\\.yaml$',
       ],
       matchStrings: [
-        'devbox-version: \'(?<currentVersion>.?)\'',
+        'devbox-version: \'(?<currentValue>.?)\'',
       ],
       depNameTemplate: 'jetify-com/devbox',
       datasourceTemplate: 'github-releases',
