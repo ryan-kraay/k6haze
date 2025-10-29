@@ -63,7 +63,7 @@
         '/^\\.github/workflows/ci-pipeline\\.yaml$',
       ],
       matchStrings: [
-        'devbox-version: \\"(?<currentValue>.?)\\"',
+        'devbox-version: \\"(?<currentValue>.+)\\"',
       ],
       depNameTemplate: 'jetify-com/devbox',
       datasourceTemplate: 'github-releases',
