@@ -59,7 +59,7 @@
       customType: 'regex',
       description: 'Devbox Installed Version',
       managerFilePatterns: [
-        '/\\.github/workflows/.+\\.ya?ml$/',
+        '/^\\.github/workflows/ci-pipeline\\.yaml$',
       ],
       matchStrings: [
         'devbox-version: \'(?<currentVersion>.?)\'',
