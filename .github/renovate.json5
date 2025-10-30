@@ -60,10 +60,10 @@
       customType: 'regex',
       description: 'Devbox Installed Version',
       managerFilePatterns: [
-        '/^\\.github/workflows/ci-pipeline\\.yaml$',
+        '/^\\.github/workflows/.+\\.ya?ml$/',
       ],
       matchStrings: [
-        'devbox-version: \\"(?<currentValue>.+?)\\"',
+        'devbox-version:\\s+\\"(?<currentValue>.+?)\\"',
       ],
       depNameTemplate: 'jetify-com/devbox',
       datasourceTemplate: 'github-releases',

@@ -15,6 +15,10 @@
     "scripts": {
       "test2": [
         "echo \"Error: no test specified\" && exit 1"
+      ],
+      "renovate": [
+        // export GITHUB_COM_TOKEN=github_pat_XXXX
+        "docker run -it --rm -v $PWD:/repo -w /repo -e GITHUB_COM_TOKEN=${GITHUB_COM_TOKEN:-} -e LOG_LEVEL=debug renovate/renovate:latest --platform=local --repository-cache=reset \"${@}\""
       ]
     }
   },
