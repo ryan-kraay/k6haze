@@ -10,6 +10,7 @@
     ':enablePreCommit',
     ':automergeDigest',
     ':automergeBranch',
+    ':rebaseStalePrs',    // always update unmerged PRs
     'github>ryan-kraay/k6haze//.github/renovate/autoMerge.json5',
     'github>ryan-kraay/k6haze//.github/renovate/commitMessage.json5',
     'github>ryan-kraay/k6haze//.github/renovate/labels.json5',
@@ -54,6 +55,19 @@
     ],
   },
   customManagers: [
+    // docs: https://docs.renovatebot.com/modules/manager/regex/
+    {
+      customType: 'regex',
+      description: 'Devbox Installed Version',
+      managerFilePatterns: [
+        '/^\\.github/workflows/.+\\.ya?ml$/',
+      ],
+      matchStrings: [
+        'devbox-version:\\s+\\"(?<currentValue>.+?)\\"',
+      ],
+      depNameTemplate: 'jetify-com/devbox',
+      datasourceTemplate: 'github-releases',
+    },
     {
       customType: 'regex',
       description: 'Process custom dependencies',
