@@ -28,7 +28,7 @@ locals {
   #
   # inorder to allow the sharing of secrets between all environments, we will reserve a path in our `secrets/` folder
   #
-  shared_environment_name = "common"
+  shared_environment_name = "shared"
 }
 
 
