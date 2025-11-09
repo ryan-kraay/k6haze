@@ -13,8 +13,7 @@ terraform {
     use_lockfile                = true
     access_key                  = ""
     secret_key                  = ""
-    endpoints                   = { s3 = "https://${var.account_id}.r2.cloudflarestorage.com" }
-
+    endpoints                   = { s3 = "https://${var.cloudflare_account_id}.r2.cloudflarestorage.com" }
   }
   required_providers {
     # Necessary to acces S3 tfstate
