@@ -32,6 +32,15 @@ jobs:
           devbox-version: "0.16.0"
 
       - name: Plan
+        env:
+          AWS_ACCESS_KEY_ID: "${{ secrets.AWS_ACCESS_KEY_ID }}"
+          AWS_SECRET_ACCESS_KEY: "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+          SOPS_AGE_KEY: "${{ secrets.SOPS_AGE_KEY }}"
+          TF_VAR_bucket: "${{ secrets.TF_VAR_bucket }}"
+          TF_VAR_cloudflare_account_id: "${{ secrets.TF_VAR_cloudflare_account_id }}"
+          TF_VAR_terraform_statefile_passphrase: "${{ secrets.TF_VAR_terraform_statefile_passphrase }}"
+
+
         run: devbox run tf-github init -input=false && devbox run tf-github plan -input=false
 
 #      - name: Publish Test Results
