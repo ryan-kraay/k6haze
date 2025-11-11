@@ -2,7 +2,7 @@ name: Terraform Deploy on Github
 run-name: "Deploy Github ${{github.ref_name}} #${{github.run_attempt}}"
 
 on:
-  push: []
+  push: {}
   workflow_dispatch: {}
 
 #on:
@@ -14,8 +14,8 @@ on:
 permissions:
   contents: read
   #environments: write
-  secrets: write
-  variables: write
+  #secrets: write
+  #variables: write
 
 jobs:
   deploy-github:
