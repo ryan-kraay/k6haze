@@ -1,7 +1,7 @@
 terraform {
   # source: https://developers.cloudflare.com/terraform/advanced-topics/remote-backend/
   backend "s3" {
-    bucket                      = ""
+    bucket                      = var.terraform_statefile_bucket
     key                         = "github.tfstate"
     region                      = "auto"
     skip_credentials_validation = true
