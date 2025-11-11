@@ -2,7 +2,10 @@ name: Terraform Deploy on Github
 run-name: "Deploy Github ${{github.ref_name}} #${{github.run_attempt}}"
 
 on:
-  push: {}
+  push:
+#    branches: ["main"]
+    paths:
+      - terraform/github/**
   workflow_dispatch: {}
 
 #on:
@@ -19,11 +22,21 @@ permissions:
 
 jobs:
   deploy-github:
+    name: Terraform
     runs-on: ubuntu-latest
     environment: RKurator
     steps:
-      - name: Checkout Code
+      - name: Generate Token
+        uses: actions/create-github-app-token@67018539274d69449ef7c02e8e71183d1719ab42 # v2.1.4
+        id: app-token
+        with:
+          app-id: "${{ secrets.BOT_APP_ID }}"
+          private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
+
+      - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          token: "${{ steps.app-token.outputs.token }}"
 
       - name: Install Devbox
         uses: jetify-com/devbox-install-action@a0d2d53632934ae004f878c840055956d9f741b0 # v0.14.0
@@ -35,9 +48,10 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: "${{ secrets.AWS_ACCESS_KEY_ID }}"
           AWS_SECRET_ACCESS_KEY: "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+          GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
           SOPS_AGE_KEY: "${{ secrets.SOPS_AGE_KEY }}"
-          TF_VAR_terraform_statefile_bucket: "${{ secrets.TF_VAR_terraform_statefile_bucket }}"
           TF_VAR_cloudflare_account_id: "${{ secrets.TF_VAR_cloudflare_account_id }}"
+          TF_VAR_terraform_statefile_bucket: "${{ secrets.TF_VAR_terraform_statefile_bucket }}"
           TF_VAR_terraform_statefile_passphrase: "${{ secrets.TF_VAR_terraform_statefile_passphrase }}"
 
 
