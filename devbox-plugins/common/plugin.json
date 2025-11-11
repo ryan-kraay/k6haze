@@ -14,6 +14,9 @@
       "test": [
         "shellspec --format documentation \"${PROJECT_ROOT}\" \"${@}\""
       ]
-    }
+    },
+    "tf-github": [
+      "tofu -chdir=\"$PWD/terraform/github\" \"${@}\""
+    ]
   }
 }
