@@ -2,11 +2,12 @@ name: Terraform Deploy on Github
 run-name: "Deploy Github ${{github.ref_name}} #${{github.run_attempt}}"
 
 on:
-  push:
+  push: {}
 #    branches: ["main"]
-    paths:
-      - terraform/github/**
-  workflow_dispatch: {}
+#    paths:
+#      - terraform/github/**
+  workflow_dispatch:
+    inputs: {}
 
 #on:
 #  push:
