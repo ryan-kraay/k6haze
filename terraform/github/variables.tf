@@ -7,6 +7,10 @@ variable "github_repo_name" {
   default     = "k6haze"
 }
 
+variable "github_owner_slug" {
+  description = "The 'owner/organization' can be extracted from the url: ie https://github.com/:owner_slug/:repo_name"
+}
+
 variable "terraform_statefile_bucket" {
   description = "The name of the S3 bucket which will hold our tfstate file"
 }

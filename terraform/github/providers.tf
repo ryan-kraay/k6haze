@@ -47,7 +47,7 @@ provider "cloudflare" {}
 provider "sops" {}
 
 provider "github" {
-  owner = "ryan-kraay"
+  owner = var.github_owner_slug
 }
 
 provider "sodium" {}
