@@ -62,7 +62,7 @@ jobs:
           TF_VAR_github_owner_slug: "${{ github.repository_owner }}"
 
 
-        run: devbox run tf-github init -input=false && devbox run tf-github plan -input=false
+        run: devbox run tf-github init -input=false && devbox run tf-github apply -auto-approve -input=false
 
 #      - name: Publish Test Results
 #        uses: EnricoMi/publish-unit-test-result-action@34d7c956a59aed1bfebf31df77b8de55db9bbaaf # v2.21.0
