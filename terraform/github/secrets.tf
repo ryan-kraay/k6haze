@@ -4,23 +4,52 @@
 #
 # using `ephemeral sops_file` won't allow us to dynamically create
 #  resources/secrets that use the env-var name.
-data "sops_file" "secrets" {
+data "sops_file" "env_secrets" {
   for_each    = fileset(path.root, "secrets/**/*.sops.env")
   source_file = each.value
+}
+# Storing secrets w/ newlines (ie: pem files) is hard to do with sops
+#  see: https://github.com/getsops/sops/issues/965
+# As an alternative we'll allow raw payloads to be encrypted
+#  Unfortunately, we lose the ability to include useful things like
+#  comments.
+data "sops_file" "raw_secrets" {
+  for_each    = fileset(path.root, "secrets/**/*.sops.raw")
+  source_file = each.value
+
+  input_type = "raw"
 }
 
 locals {
   # We will expand and flatten all the sops files into a single map
   # There will be no attempts to resolve duplicate secret keys
-  environment_secrets = merge([for file_name, sops in data.sops_file.secrets : {
-    for k, v in nonsensitive(sops.data) : "${split("/", file_name)[1]}#${k}" => {
-      # The format of file_name is: "secrets/<environment_name>/<meaningless_name>.sops.env"
+  environment_secrets = merge(
+    # Process our *.sops.raw files...
+    { for file_name, sops in data.sops_file.raw_secrets : "${split("/", file_name)[1]}#${split(".", basename(file_name))[0]}" => {
+      # The format of file_name is: "secrets/<environment_name>/<secret_name>.sops.env"
       env_name = split("/", file_name)[1]
 
-      secret_name     = k
-      plaintext_value = sensitive(v)
-    }
+      # example: secrets/development/EXAMPLE.sops.raw
+      #  basename: EXAMPLE.sops.raw
+      #  split(".")[0]: EXAMPLE
+      secret_name     = split(".", basename(file_name))[0]
+      plaintext_value = sensitive(sops.raw)
+    } },
+
+    # Process our *.sops.env files...
+    [for file_name, sops in data.sops_file.env_secrets : {
+      # the sops-provider marks _all_ data as sensensitive, which means we cannot use
+      # the map keys as part of our resource names.  So we'll mark the entire structure
+      # as nonsensitive and remark the relevant bits
+      for k, v in nonsensitive(sops.data) : "${split("/", file_name)[1]}#${k}" => {
+        # The format of file_name is: "secrets/<environment_name>/<meaningless_name>.sops.env"
+        env_name = split("/", file_name)[1]
+
+        secret_name     = k
+        plaintext_value = sensitive(v)
+      }
   }]...)
+
 
   #
   # github secrets allows secrets to be encapsulated in an environment, but also
