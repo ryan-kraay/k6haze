@@ -108,7 +108,7 @@ jobs:
           TF_VAR_terraform_statefile_bucket: "${{ secrets.TF_VAR_terraform_statefile_bucket }}"
           TF_VAR_terraform_statefile_passphrase: "${{ secrets.TF_VAR_terraform_statefile_passphrase }}"
           TF_VAR_github_owner_slug: "${{ github.repository_owner }}"
-        run: devbox run tf-github plan -input=false
+        run: devbox-w run tf-github plan -input=false
         continue-on-error: true
 
 #        # TODO:
