@@ -29,7 +29,13 @@ runs:
       run: |
         set -euo pipefail
 
-        WRAPPER_SCRIPT="/usr/bin/${{ inputs.wrapper }}"
+        BIN_DIR="${RUNNER_TEMP:-/tmp}/capture-wrapper/bin"
+        mkdir -p "${BIN_DIR}"
+        # Allow other steps _within_ this job to access our wrappers
+        echo "${BIN_DIR}" >> "$GITHUB_PATH"
+
+
+        WRAPPER_SCRIPT="${BIN_DIR}/${{ inputs.wrapper }}"
 
         ##
         ## BEGINNING OF THE GENERATED SHELL SCRPIT
@@ -65,7 +71,7 @@ runs:
         exit $xit
         EOF
         ##
-        ## END OF THE GENERATED SHELL SCRPIT
+        ## END OF THE GENERATED SHELL SCRIPT
         ##
 
         chmod a+x "${WRAPPER_SCRIPT}"
