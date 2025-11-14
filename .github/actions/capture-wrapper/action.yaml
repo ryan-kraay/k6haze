@@ -30,36 +30,43 @@ runs:
         set -euo pipefail
 
         WRAPPER_SCRIPT="/usr/bin/${{ inputs.wrapper }}"
+
+        ##
+        ## BEGINNING OF THE GENERATED SHELL SCRPIT
+        ##
         cat > "${WRAPPER_SCRIPT}" <<'EOF'
-#!/usr/bin/env bash
-set -euo pipefail
+        #!/usr/bin/env bash
+        set -euo pipefail
 
-STDOUT_CAPTURE=$(mktemp -u)
-STDERR_CAPTURE=$(mktemp -u)
+        STDOUT_CAPTURE=$(mktemp -u)
+        STDERR_CAPTURE=$(mktemp -u)
 
-set +e
-stdbuf -oL -eL ${{ inputs.command }} "$@" 2> >(tee "${STDERR_CAPTURE}") > >(tee "${STDOUT_CAPTURE}")
-xit=$?
-set -e
+        set +e
+        stdbuf -oL -eL ${{ inputs.command }} "$@" 2> >(tee "${STDERR_CAPTURE}") > >(tee "${STDOUT_CAPTURE}")
+        xit=$?
+        set -e
 
-# We use our STDOUT_CAPTURE as a tag - just to introduce a "random" tag to avoid output which _may_
-#   contain common text like 'EOF' 'EOL', etc.
-{
-  echo "${{ inputs.outputs_stdout }}<<${STDOUT_CAPTURE}"
-  cat "${STDOUT_CAPTURE}"
-  echo "${STDOUT_CAPTURE}"
-} | tee -a "$GITHUB_OUTPUT"
+        # We use our STDOUT_CAPTURE as a tag - just to introduce a "random" tag to avoid output which _may_
+        #   contain common text like 'EOF' 'EOL', etc.
+        {
+          echo "${{ inputs.outputs_stdout }}<<${STDOUT_CAPTURE}"
+          cat "${STDOUT_CAPTURE}"
+          echo "${STDOUT_CAPTURE}"
+        } | tee -a "$GITHUB_OUTPUT"
 
-{
-  echo "${{ inputs.outputs_stderr }}<<${STDERR_CAPTURE}"
-  cat "${STDERR_CAPTURE}"
-  echo "${STDERR_CAPTURE}"
-} | tee -a "$GITHUB_OUTPUT"
+        {
+          echo "${{ inputs.outputs_stderr }}<<${STDERR_CAPTURE}"
+          cat "${STDERR_CAPTURE}"
+          echo "${STDERR_CAPTURE}"
+        } | tee -a "$GITHUB_OUTPUT"
 
-echo "${{ inputs.outputs_exit_code }}=${xit}" >> "$GITHUB_OUTPUT"
+        echo "${{ inputs.outputs_exit_code }}=${xit}" >> "$GITHUB_OUTPUT"
 
-exit $xit
-EOF
+        exit $xit
+        EOF
+        ##
+        ## END OF THE GENERATED SHELL SCRPIT
+        ##
 
         chmod a+x "${WRAPPER_SCRIPT}"
         echo "Generated ${WRAPPER_SCRIPT}"
