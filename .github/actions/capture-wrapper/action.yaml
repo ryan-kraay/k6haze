@@ -58,15 +58,18 @@ runs:
           echo "${{ inputs.outputs_stdout }}<<${STDOUT_CAPTURE}"
           cat "${STDOUT_CAPTURE}"
           echo "${STDOUT_CAPTURE}"
-        } | tee -a "$GITHUB_OUTPUT"
+        } >> "$GITHUB_OUTPUT"
 
         {
           echo "${{ inputs.outputs_stderr }}<<${STDERR_CAPTURE}"
           cat "${STDERR_CAPTURE}"
           echo "${STDERR_CAPTURE}"
-        } | tee -a "$GITHUB_OUTPUT"
+        } >> "$GITHUB_OUTPUT"
 
         echo "${{ inputs.outputs_exit_code }}=${xit}" >> "$GITHUB_OUTPUT"
+
+        # Cleanup
+        rm "${STDERR_CAPTURE}" "${STDOUT_CAPTURE}"
 
         exit $xit
         EOF
