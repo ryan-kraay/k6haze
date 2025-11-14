@@ -50,7 +50,14 @@ jobs:
           enable-cache: 'true'
           devbox-version: "0.16.0"
 
-      - name: Plan
+      - name: Create Wrapper
+        uses: ./.github/actions/capture-wrapper
+        with:
+          command: "devbox"
+          wrapper: "devbox-w"
+
+      - name: Syntax Formatting
+        id: fmt
         env:
           AWS_ACCESS_KEY_ID: "${{ secrets.AWS_ACCESS_KEY_ID }}"
           AWS_SECRET_ACCESS_KEY: "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
@@ -60,14 +67,116 @@ jobs:
           TF_VAR_terraform_statefile_bucket: "${{ secrets.TF_VAR_terraform_statefile_bucket }}"
           TF_VAR_terraform_statefile_passphrase: "${{ secrets.TF_VAR_terraform_statefile_passphrase }}"
           TF_VAR_github_owner_slug: "${{ github.repository_owner }}"
+        run: devbox-w run tf-github fmt -recursive -check .
+        continue-on-error: true
 
-
-        run: devbox run tf-github init -input=false && devbox run tf-github apply -auto-approve -input=false
-
-#      - name: Publish Test Results
-#        uses: EnricoMi/publish-unit-test-result-action@34d7c956a59aed1bfebf31df77b8de55db9bbaaf # v2.21.0
-#        if: always()
+#      - name: Initialize
+#        id: init
+#        env:
+#          AWS_ACCESS_KEY_ID: "${{ secrets.AWS_ACCESS_KEY_ID }}"
+#          AWS_SECRET_ACCESS_KEY: "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+#          GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
+#          SOPS_AGE_KEY: "${{ secrets.SOPS_AGE_KEY }}"
+#          TF_VAR_cloudflare_account_id: "${{ secrets.TF_VAR_cloudflare_account_id }}"
+#          TF_VAR_terraform_statefile_bucket: "${{ secrets.TF_VAR_terraform_statefile_bucket }}"
+#          TF_VAR_terraform_statefile_passphrase: "${{ secrets.TF_VAR_terraform_statefile_passphrase }}"
+#          TF_VAR_github_owner_slug: "${{ github.repository_owner }}"
+#        run: devbox run tf-github init -input=false
+#
+#      - name: Validate
+#        id: validate
+#        env:
+#          AWS_ACCESS_KEY_ID: "${{ secrets.AWS_ACCESS_KEY_ID }}"
+#          AWS_SECRET_ACCESS_KEY: "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+#          GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
+#          SOPS_AGE_KEY: "${{ secrets.SOPS_AGE_KEY }}"
+#          TF_VAR_cloudflare_account_id: "${{ secrets.TF_VAR_cloudflare_account_id }}"
+#          TF_VAR_terraform_statefile_bucket: "${{ secrets.TF_VAR_terraform_statefile_bucket }}"
+#          TF_VAR_terraform_statefile_passphrase: "${{ secrets.TF_VAR_terraform_statefile_passphrase }}"
+#          TF_VAR_github_owner_slug: "${{ github.repository_owner }}"
+#        run: devbox run tf-github validate
+#
+#      - name: Plan
+#        id: plan
+#        env:
+#          AWS_ACCESS_KEY_ID: "${{ secrets.AWS_ACCESS_KEY_ID }}"
+#          AWS_SECRET_ACCESS_KEY: "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+#          GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
+#          SOPS_AGE_KEY: "${{ secrets.SOPS_AGE_KEY }}"
+#          TF_VAR_cloudflare_account_id: "${{ secrets.TF_VAR_cloudflare_account_id }}"
+#          TF_VAR_terraform_statefile_bucket: "${{ secrets.TF_VAR_terraform_statefile_bucket }}"
+#          TF_VAR_terraform_statefile_passphrase: "${{ secrets.TF_VAR_terraform_statefile_passphrase }}"
+#          TF_VAR_github_owner_slug: "${{ github.repository_owner }}"
+#        run: devbox run tf-github plan -input=false
+#        continue-on-error: true
+#
+#        # TODO:
+#        #   check outputs for this event
+#        #   maybe add: - uses: hashicorp/setup-terraform@v3
+#      - name: Update Pull Request
+#        # Insipired by: https://github.com/marketplace/actions/hashicorp-setup-terraform#outputs
+#        uses: actions/github-script@v7
+#        if: github.event_name == 'pull_request'
+#        env:
+#          PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
 #        with:
-#          check_run: false
-#          files: |
-#            report/*.xml
+#          github-token: ${{ secrets.GITHUB_TOKEN }}
+#          script: |
+#            // 1. Retrieve existing bot comments for the PR
+#            const { data: comments } = await github.rest.issues.listComments({
+#              owner: context.repo.owner,
+#              repo: context.repo.repo,
+#              issue_number: context.issue.number,
+#            })
+#            const botComment = comments.find(comment => {
+#              return comment.user.type === 'Bot' && comment.body.includes('Terraform Format and Style')
+#            })
+#
+#            // 2. Prepare format of the comment
+#            const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
+#            #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
+#            #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
+#            <details><summary>Validation Output</summary>
+#
+#            \`\`\`\n
+#            ${{ steps.validate.outputs.stdout }}
+#            \`\`\`
+#
+#            </details>
+#
+#            #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+#
+#            <details><summary>Show Plan</summary>
+#
+#            \`\`\`\n
+#            ${process.env.PLAN}
+#            \`\`\`
+#
+#            </details>
+#
+#            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ env.tf_actions_working_dir }}\`, Workflow: \`${{ github.workflow }}\`*`;
+#
+#            // 3. If we have a comment, update it, otherwise create a new one
+#            if (botComment) {
+#              github.rest.issues.updateComment({
+#                owner: context.repo.owner,
+#                repo: context.repo.repo,
+#                comment_id: botComment.id,
+#                body: output
+#              })
+#            } else {
+#              github.rest.issues.createComment({
+#                issue_number: context.issue.number,
+#                owner: context.repo.owner,
+#                repo: context.repo.repo,
+#                body: output
+#              })
+#            }
+#
+##      - name: Publish Test Results
+##        uses: EnricoMi/publish-unit-test-result-action@34d7c956a59aed1bfebf31df77b8de55db9bbaaf # v2.21.0
+##        if: always()
+##        with:
+##          check_run: false
+##          files: |
+##            report/*.xml
