@@ -130,6 +130,7 @@ jobs:
         with:
           github-token: ${{ steps.app-token.outputs.token }}
           script: |
+            /*
             // 1. Retrieve existing bot comments for the PR
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,
@@ -139,6 +140,8 @@ jobs:
             const botComment = comments.find(comment => {
               return comment.user.type === 'Bot' && comment.body.includes('Terraform Format and Style')
             })
+            */
+            const botComment = false
 
             // 2. Prepare format of the comment
             const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
