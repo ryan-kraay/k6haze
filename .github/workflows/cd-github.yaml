@@ -173,9 +173,28 @@ jobs:
           #}
           #
           sed -i '/# forces replacement/ s/^ /-/' "${CAPTURE}"
-          sed -i '/^[[:space:]]+~/ s/^ /!/' "${CAPTURE}"
+          sed -i '/^[[:space:]]*~/ s/^ /!/' "${CAPTURE}"
           sed -i '/^-\/\+/ s/^/!/' "${CAPTURE}"
 
+          ##
+          ## Add resources
+          ##
+          #  # github_actions_environment_secret.encrypted_secrets["curator#BOT_APP_ID"] will be created
+          #  + resource "github_actions_environment_secret" "encrypted_secrets" {
+          #      + created_at      = (known after apply)
+          #      + encrypted_value = (sensitive value)
+          #      + environment     = "curator"
+          #      + id              = (known after apply)
+          #      + repository      = "k6haze"
+          #      + secret_name     = "BOT_APP_ID"
+          #      + updated_at      = (known after apply)
+          #    }
+          sed -i '/^[[:space:]]*\+/ s/^ /\+/' "${CAPTURE}"
+
+          ##
+          ## Destroy resources
+          ##
+          sed -i '/^[[:space:]]*-/ s/^ /-/' "${CAPTURE}"
 
 
           {
