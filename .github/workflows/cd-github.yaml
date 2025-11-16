@@ -118,11 +118,18 @@ jobs:
         run: devbox-w run tf-github plan -input=false
         continue-on-error: true
 
-      - name: Update Pull Request
+      - name: Find PR
+        uses: jwalton/gh-find-current-pr@v1
+        id: findPR
+        with:
+          # Can be "open", "closed", or "all".  Defaults to "open".
+          state: open
+
+      - name: "Update PR ${{ steps.findPR.pr }}"
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-          number: 24
+          number: ${{ steps.findPR.pr }}
           header: test
           message: |
             ```
