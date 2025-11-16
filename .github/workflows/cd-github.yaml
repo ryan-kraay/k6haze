@@ -78,13 +78,17 @@ jobs:
             // Inputs
             const branchName = process.env.BRANCH_NAME;
             if (!branchName) {
-              core.setFailed('BRANCH_NAME input is required.');
+              const err = 'BRANCH_NAME input is required.';
+              core.setFailed(err);
+              throw new Error(err);
             }
 
             // Current run SHA
             const runSha = process.env.GITHUB_SHA;
             if (!runSha) {
-              core.setFailed('GITHUB_SHA not set in environment.');
+              const err = 'GITHUB_SHA not set in environment.'
+              core.setFailed(err);
+              throw new Error(err);
             }
 
             // Fetch the branch
@@ -96,11 +100,15 @@ jobs:
 
             const branchSha = refData && refData.object && refData.object.sha ? refData.object.sha : null;
             if (!branchSha) {
-              core.setFailed('Could not determine SHA from branch');
+              const err = 'Could not determine SHA from branch';
+              core.setFailed(err);
+              throw new Error(err);
             }
             //core.setOutput('is-latest', branchSha === runSha);
             if (branchSha === runSha) {
-              core.setFailed('Terraform changes can only be applied to HEAD branches.');
+              const err = 'Terraform changes can only be applied to HEAD branches.';
+              core.setFailed(err);
+              throw new Error(err);
             }
 
       - name: Install Devbox
