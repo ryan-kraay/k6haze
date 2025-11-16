@@ -164,7 +164,7 @@ jobs:
           # Process add/remove resources...
 
           # # github_actions_secret.encrypted_shared_secrets["shared#TF_VAR_terraform_statefile_bucket"] must be replaced
-      -/+ # resource "github_actions_secret" "encrypted_shared_secrets" {
+          #-/+ resource "github_actions_secret" "encrypted_shared_secrets" {
           #  ~ created_at       = "2025-11-12 19:50:20 +0000 UTC" -> (known after apply)
           #  ~ encrypted_value  = (sensitive value) # forces replacement
           #  ~ id               = "k6haze:TF_VAR_terraform_statefile_bucket" -> (known after apply)
