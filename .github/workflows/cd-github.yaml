@@ -66,6 +66,41 @@ jobs:
         with:
           token: "${{ steps.elevated-app-token.outputs.token }}"
 
+      - name: Check branch head equals current checkout
+        id: is_latest_checkout
+        uses: actions/github-script@v8
+        env:
+          BRANCH_NAME: ${{ github.ref_name }}
+          GITHUB_SHA: ${{ github.sha }}
+        with:
+          github-token: "${{ steps.app-token.outputs.token }}"
+          script: |
+            // Inputs
+            const branchName = process.env.BRANCH_NAME
+            if (!branchName) {
+              core.setFailed('BRANCH_NAME input is required.');
+            }
+
+            // Current run SHA
+            const runSha = process.env.GITHUB_SHA;
+            if (!runSha) {
+              core.setFailed('GITHUB_SHA not set in environment.');
+            }
+
+            // Fetch the branch
+            const { data: refData } = await github.git.getRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              `heads/${branchName}`,
+            });
+
+            const branchSha = refData && refData.object && refData.object.sha ? refData.object.sha ? null;
+            if (!branchSha) {
+              core.setFailed('Could not determine SHA from branch');
+              return;
+            }
+            core.setOutput('is_latest', branchSha === runSha);
+
       - name: Install Devbox
         uses: jetify-com/devbox-install-action@a0d2d53632934ae004f878c840055956d9f741b0 # v0.14.0
         with:
