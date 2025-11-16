@@ -91,10 +91,10 @@ jobs:
             const { data: refData } = await github.git.getRef({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              `heads/${branchName}`,
+              ref: `heads/${branchName}`,
             });
 
-            const branchSha = refData && refData.object && refData.object.sha ? refData.object.sha ? null;
+            const branchSha = refData && refData.object && refData.object.sha ? refData.object.sha : null;
             if (!branchSha) {
               core.setFailed('Could not determine SHA from branch');
             }
