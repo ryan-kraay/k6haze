@@ -104,6 +104,7 @@ jobs:
               core.setFailed(err);
               throw new Error(err);
             }
+            core.warning(`branchSha(${branchSha}) === runSha(${runSha})`);
             //core.setOutput('is-latest', branchSha === runSha);
             if (branchSha === runSha) {
               const err = 'Terraform changes can only be applied to HEAD branches.';
