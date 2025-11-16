@@ -100,7 +100,7 @@ jobs:
             }
             //core.setOutput('is-latest', branchSha === runSha);
             if (branchSha === runSha) {
-              core.setFailed(`Terraform changes can only be applied to HEAD branches`.)
+              core.setFailed('Terraform changes can only be applied to HEAD branches'.);
             }
 
       - name: Install Devbox
