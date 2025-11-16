@@ -176,9 +176,19 @@ jobs:
           sed -i '/^[[:space:]]*~/ s/^ /!/' "${CAPTURE}"
           sed -i '/^-\/\+/ s/^/!/' "${CAPTURE}"
 
+          # Highlight comments
+          sed -i '/^[[:space:]]*#/ s/^ /#/' "${CAPTURE}"
+
+          ##
+          ## Destroy resources
+          ##
+          sed -i '/^[[:space:]]*-/ s/^ /-/' "${CAPTURE}"
+
           ##
           ## Add resources
           ##
+          ## NOTE:  This line is a bit flacky and it'll match everything that
+          ##  does not contain a starting character.  hence, we add it as our last line
           #  # github_actions_environment_secret.encrypted_secrets["curator#BOT_APP_ID"] will be created
           #  + resource "github_actions_environment_secret" "encrypted_secrets" {
           #      + created_at      = (known after apply)
@@ -191,10 +201,6 @@ jobs:
           #    }
           sed -i '/^[[:space:]]*\+/ s/^ /\+/' "${CAPTURE}"
 
-          ##
-          ## Destroy resources
-          ##
-          sed -i '/^[[:space:]]*-/ s/^ /-/' "${CAPTURE}"
 
 
           {
