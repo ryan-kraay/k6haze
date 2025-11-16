@@ -131,7 +131,7 @@ jobs:
           github-token: ${{ steps.app-token.outputs.token }}
           script: |
             // 1. Retrieve existing bot comments for the PR
-            const { data: comments } = await github.rest.pulls.listComments({
+            const { data: comments } = await github.rest.pulls.listReviewComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
