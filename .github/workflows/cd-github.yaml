@@ -134,7 +134,7 @@ jobs:
             const { data: comments } = await github.rest.pulls.listReviewComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              issue_number: context.issue.number,
+              issue_number: 24, // context.issue.number,
             })
             const botComment = comments.find(comment => {
               return comment.user.type === 'Bot' && comment.body.includes('Terraform Format and Style')
@@ -174,7 +174,7 @@ jobs:
               })
             } else {
               github.rest.pulls.createComment({
-                issue_number: context.issue.number,
+                issue_number: 24, // context.issue.number,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 body: output
