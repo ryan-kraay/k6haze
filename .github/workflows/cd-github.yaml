@@ -62,6 +62,7 @@ jobs:
           private-key: "${{ secrets.BOT_APP_PRIVATE_KEY2 }}"
 
       - name: Checkout
+        id: checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           token: "${{ steps.elevated-app-token.outputs.token }}"
@@ -70,8 +71,8 @@ jobs:
         id: is-latest-checkout
         uses: actions/github-script@v8
         env:
-          BRANCH_NAME: "20-integrate-opentofu" # ${{ github.ref }}
-          GITHUB_SHA: ${{ github.sha }}
+          BRANCH_NAME: ${{ steps.checkout.outputs.ref }} # "20-integrate-opentofu" # ${{ github.ref }}
+          GITHUB_SHA: ${{ steps.checkout.outputs.commit }}
         with:
           github-token: "${{ steps.app-token.outputs.token }}"
           script: |
