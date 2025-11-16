@@ -67,7 +67,7 @@ jobs:
           token: "${{ steps.elevated-app-token.outputs.token }}"
 
       - name: Check branch head equals current checkout
-        id: is_latest_checkout
+        id: is-latest-checkout
         uses: actions/github-script@v8
         env:
           BRANCH_NAME: "20-integrate-opentofu" # ${{ github.ref }}
@@ -98,7 +98,10 @@ jobs:
             if (!branchSha) {
               core.setFailed('Could not determine SHA from branch');
             }
-            core.setOutput('is_latest', branchSha === runSha);
+            //core.setOutput('is-latest', branchSha === runSha);
+						if (branchSha === runSha) {
+							core.setFailed(`Terraform changes can only be applied to HEAD branches`.)
+						}
 
       - name: Install Devbox
         uses: jetify-com/devbox-install-action@a0d2d53632934ae004f878c840055956d9f741b0 # v0.14.0
