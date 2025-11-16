@@ -130,15 +130,18 @@ jobs:
         with:
           github-token: ${{ steps.app-token.outputs.token }}
           script: |
+            const prNumber = context.payload.pull_request?.number || context.issue.number;
+            const commitId = context.payload.pull_request?.head.sha;
+
             // 1. Retrieve existing bot comments for the PR
             const { data: comments } = await github.rest.pulls.listReviewComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: 24, // context.issue.number,
-            })
+            });
             const botComment = comments.find(comment => {
               return comment.user.type === 'Bot' && comment.body.includes('Terraform Format and Style')
-            })
+            });
 
             // 2. Prepare format of the comment
             const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
@@ -171,14 +174,17 @@ jobs:
                 repo: context.repo.repo,
                 comment_id: botComment.id,
                 body: output
-              })
+              });
             } else {
               github.rest.pulls.createReviewComment({
-                pull_number: 24, // context.issue.number,
+                pull_number: 24, // prNumber,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
+                commit_id: commitId,
+                path: 'CHANGELOG.md',
+                position: 1,
                 body: output
-              })
+              });
             }
 
 ##      - name: Publish Test Results
