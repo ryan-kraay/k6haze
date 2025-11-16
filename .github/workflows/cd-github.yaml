@@ -154,7 +154,30 @@ jobs:
             emoji="🟩"
           fi
 
-          # Process CAPTURE
+          ## Process CAPTURE using `diff` highlighting
+          ##  Github diff highlighting only supports
+          ##  `+ add in green`
+          ##  `- delete in red`
+          ##  `! change in yellow`
+          ##  `# comment in gray`
+
+          # Process add/remove resources...
+
+          # # github_actions_secret.encrypted_shared_secrets["shared#TF_VAR_terraform_statefile_bucket"] must be replaced
+      -/+ # resource "github_actions_secret" "encrypted_shared_secrets" {
+          #  ~ created_at       = "2025-11-12 19:50:20 +0000 UTC" -> (known after apply)
+          #  ~ encrypted_value  = (sensitive value) # forces replacement
+          #  ~ id               = "k6haze:TF_VAR_terraform_statefile_bucket" -> (known after apply)
+          #  ~ updated_at       = "2025-11-12 19:50:20 +0000 UTC" -> (known after apply)
+          #    # (3 unchanged attributes hidden)
+          #}
+          #
+          sed -i '/# forces replacement/ s/^ /-/' "${CAPTURE}"
+          sed -i '/^[[:space:]]+~/ s/^ /!/' "${CAPTURE}"
+          sed -i '/^-\/\+/ s/^/!/' "${CAPTURE}"
+
+
+
           {
             echo "markdown<<${CAPTURE}"
             echo "#### Outcome: $emoji  add=$tf_add change=$tf_change destroy=$tf_destroy"
