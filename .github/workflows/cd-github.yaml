@@ -71,8 +71,8 @@ jobs:
         id: is-latest-checkout
         uses: actions/github-script@v8
         env:
-          BRANCH_NAME: ${{ steps.checkout.outputs.ref }} # "20-integrate-opentofu" # ${{ github.ref }}
-          GITHUB_SHA: ${{ steps.checkout.outputs.commit }}
+          BRANCH_NAME: ${{ github.ref_name }}
+          GITHUB_SHA: ${{ github.context.sha }}
         with:
           github-token: "${{ steps.app-token.outputs.token }}"
           script: |
