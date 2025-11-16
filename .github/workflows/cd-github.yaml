@@ -115,7 +115,7 @@ jobs:
           TF_VAR_terraform_statefile_bucket: "${{ secrets.TF_VAR_terraform_statefile_bucket }}"
           TF_VAR_terraform_statefile_passphrase: "${{ secrets.TF_VAR_terraform_statefile_passphrase }}"
           TF_VAR_github_owner_slug: "${{ github.repository_owner }}"
-        run: devbox-w run tf-github plan -input=false
+        run: devbox-w run tf-github plan -input=false -out=terraform.tfplan
         continue-on-error: true
 
       - name: Find PR
@@ -125,16 +125,72 @@ jobs:
           # Can be "open", "closed", or "all".  Defaults to "open".
           state: open
 
+			- name: Plan Markdown
+        if: success() && steps.findPR.outputs.number
+				id: plan-md
+        env:
+          AWS_ACCESS_KEY_ID: "${{ secrets.AWS_ACCESS_KEY_ID }}"
+          AWS_SECRET_ACCESS_KEY: "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+          GITHUB_TOKEN: "${{ steps.elevated-app-token.outputs.token }}"
+          SOPS_AGE_KEY: "${{ secrets.SOPS_AGE_KEY }}"
+          TF_VAR_cloudflare_account_id: "${{ secrets.TF_VAR_cloudflare_account_id }}"
+          TF_VAR_terraform_statefile_bucket: "${{ secrets.TF_VAR_terraform_statefile_bucket }}"
+          TF_VAR_terraform_statefile_passphrase: "${{ secrets.TF_VAR_terraform_statefile_passphrase }}"
+          TF_VAR_github_owner_slug: "${{ github.repository_owner }}"
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          CAPTURE=$(mktemp -u)
+          devbox run tf-github show -plan=terraform.tfplan -no-color > "${CAPTURE}"
+
+          # Process CAPTURE
+          {
+            echo "markdown<<${CAPTURE}"
+            cat <<'EOL'
+          #### Terraform Format and Style 🖌`${{ steps.fmt.outcome }}`
+          #### Terraform Initialization ⚙️`${{ steps.init.outcome }}`
+          #### Terraform Validation 🤖`${{ steps.validate.outcome }}`
+          <details><summary>Validation Output</summary>
+
+          ```\n
+          ${{ steps.validate.outputs.stdout }}
+          ```
+
+          </details>
+
+          #### Terraform Plan 📖`${{ steps.plan.outcome }}`
+
+          <details><summary>Show Plan</summary>
+
+          ```
+          EOL
+            cat "${CAPTURE}"
+            cat <<'EOL'
+          ```
+
+          </details>
+
+          *Pusher: @${{ github.actor }}, Action: `${{ github.event_name }}`, Working Directory: `${{ env.tf_actions_working_dir }}`, Workflow: `${{ github.workflow }}`*`;
+          EOL
+            echo "${CAPTURE}" # Our ending marker
+          } >> "$GITHUB_OUTPUT"
+
+          rm "${CAPTURE}"
+
+
       - name: "Update PR ${{ steps.findPR.outputs.pr }}"
+        if: success() && steps.findPR.outputs.number
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
           number: ${{ steps.findPR.outputs.pr }}
           header: test
-          message: |
-            ```
-            hello world
-            ```
+          message: ${{ steps.plan-md.outputs.markdown }}
+#          message: |
+#            ```
+#            hello world
+#            ```
 
         # TODO:
         #   check outputs for this event
