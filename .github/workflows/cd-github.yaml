@@ -143,10 +143,21 @@ jobs:
 
           CAPTURE=$(mktemp -u)
           devbox run tf-github show -plan=terraform.tfplan -no-color > "${CAPTURE}"
+          read tf_add tf_change tf_destroy < <(sed -nE 's/^Plan: +([0-9]+) +to add, +([0-9]+) +to change, +([0-9]+) +to destroy.*/\1 \2 \3/p' "${CAPTURE}")
+
+          # Try to classify a color-code based on the outcome
+          if (( tf_add != 0 || tf_change != 0 )); then
+            emoji="🟨"
+          elif (( tf_destroy != 0 )); then
+            emoji="🟥"
+          else
+            emoji="🟩"
+          fi
 
           # Process CAPTURE
           {
             echo "markdown<<${CAPTURE}"
+            echo "#### Outcome: $emoji  add=$tf_add change=$tf_change destroy=$tf_destroy"
             cat <<'EOL'
           #### Terraform Format and Style 🖌`${{ steps.fmt.outcome }}`
           #### Terraform Initialization ⚙️`${{ steps.init.outcome }}`
@@ -163,7 +174,7 @@ jobs:
 
           <details><summary>Show Plan</summary>
 
-          ```
+          ```diff
           EOL
             cat "${CAPTURE}"
             cat <<'EOL'
