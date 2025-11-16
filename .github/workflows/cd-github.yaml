@@ -76,7 +76,7 @@ jobs:
           github-token: "${{ steps.app-token.outputs.token }}"
           script: |
             // Inputs
-            const branchName = process.env.BRANCH_NAME
+            const branchName = process.env.BRANCH_NAME;
             if (!branchName) {
               core.setFailed('BRANCH_NAME input is required.');
             }
@@ -97,7 +97,6 @@ jobs:
             const branchSha = refData && refData.object && refData.object.sha ? refData.object.sha ? null;
             if (!branchSha) {
               core.setFailed('Could not determine SHA from branch');
-              return;
             }
             core.setOutput('is_latest', branchSha === runSha);
 
