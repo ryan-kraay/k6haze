@@ -71,8 +71,10 @@ jobs:
         id: is-latest-checkout
         uses: actions/github-script@v8
         env:
-          BRANCH_NAME: ${{ github.ref_name }}
-          GITHUB_SHA: ${{ github.context.sha }}
+          BRANCH_NAME: ${{ github.ref }}
+          #BRANCH_NAME: ${{ github.ref_name }}
+          #GITHUB_SHA: ${{ github.context.sha }}
+          GITHUB_SHA: ${{ github.sha }}
         with:
           github-token: "${{ steps.app-token.outputs.token }}"
           script: |
@@ -96,7 +98,8 @@ jobs:
             const { data: refData } = await github.rest.git.getRef({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              ref: `heads/${branchName}`,
+              // ref: `heads/${branchName}`,
+              ref: branchName,
             });
 
             const branchSha = refData && refData.object && refData.object.sha ? refData.object.sha : null;
