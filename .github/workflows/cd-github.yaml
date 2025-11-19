@@ -99,7 +99,8 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               // ref: `heads/${branchName}`,
-              ref: branchName,
+              //ref: branchName,
+              ref: 'pulls/24/merge',
             });
 
             const branchSha = refData && refData.object && refData.object.sha ? refData.object.sha : null;
