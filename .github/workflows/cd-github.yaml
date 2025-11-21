@@ -69,53 +69,23 @@ jobs:
 
       - name: Check branch head equals current checkout
         id: is-latest-checkout
-        uses: actions/github-script@v8
         env:
           BRANCH_NAME: ${{ github.ref }}
           #BRANCH_NAME: ${{ github.ref_name }}
           #GITHUB_SHA: ${{ github.context.sha }}
           GITHUB_SHA: ${{ github.sha }}
-        with:
-          github-token: "${{ steps.app-token.outputs.token }}"
-          script: |
-            // Inputs
-            const branchName = process.env.BRANCH_NAME;
-            if (!branchName) {
-              const err = 'BRANCH_NAME input is required.';
-              core.setFailed(err);
-              throw new Error(err);
-            }
+        shell: bash
+        run: |
+          set -euo pipefail
 
-            // Current run SHA
-            const runSha = process.env.GITHUB_SHA;
-            if (!runSha) {
-              const err = 'GITHUB_SHA not set in environment.'
-              core.setFailed(err);
-              throw new Error(err);
-            }
+          ORIGIN_SHA=$(git ls-remote origin "${BRANCH_NAME}" | awk '{print $1}')
+          echo "current sha: ${GITHUB_SHA}"
+          echo "origin sha: "${ORIGIN_SHA}"
 
-            // Fetch the branch
-            const { data: refData } = await github.rest.git.getRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              // ref: `heads/${branchName}`,
-              //ref: branchName,
-              ref: 'pulls/24/merge',
-            });
-
-            const branchSha = refData && refData.object && refData.object.sha ? refData.object.sha : null;
-            if (!branchSha) {
-              const err = 'Could not determine SHA from branch';
-              core.setFailed(err);
-              throw new Error(err);
-            }
-            core.warning(`branchSha(${branchSha}) === runSha(${runSha})`);
-            //core.setOutput('is-latest', branchSha === runSha);
-            if (branchSha !== runSha) {
-              const err = 'Terraform changes can only be applied to HEAD branches.';
-              core.setFailed(err);
-              throw new Error(err);
-            }
+          if [[ "${GITHUB_SHA}" != "${ORIGIN_SHA}" ]]; then
+            echo "current sha(${GITHUB_SHA}) does not match latest origin sha(${ORIGIN_SHA})."
+            exit 10
+          fi
 
       - name: Install Devbox
         uses: jetify-com/devbox-install-action@a0d2d53632934ae004f878c840055956d9f741b0 # v0.14.0
