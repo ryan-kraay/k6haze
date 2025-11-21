@@ -80,10 +80,10 @@ jobs:
 
           ORIGIN_SHA=$(git ls-remote origin "${BRANCH_NAME}" | awk '{print $1}')
           echo "current sha: ${GITHUB_SHA}"
-          echo "origin sha: "${ORIGIN_SHA}"
+          echo "origin sha: ${ORIGIN_SHA}"
 
           if [[ "${GITHUB_SHA}" != "${ORIGIN_SHA}" ]]; then
-            echo "current sha(${GITHUB_SHA}) does not match latest origin sha(${ORIGIN_SHA})."
+            echo "current sha(${GITHUB_SHA}) is NOT the latest origin sha(${ORIGIN_SHA}) -- pipeline aborted."
             exit 10
           fi
 
