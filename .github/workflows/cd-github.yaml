@@ -77,3 +77,4 @@ jobs:
       environment_name: RKurator
       apply_terraform: false
       devbox_run_terraform: "tf-github"
+    secrets: inherit
