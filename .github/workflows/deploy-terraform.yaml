@@ -3,13 +3,17 @@ name: Terraform Deploy
 on:
   workflow_call:
     inputs:
-      environment_name:
-        description: "The environment to use"
-        type: string
-        required: true
       apply_terraform:
         description: "Apply changes?"
         type: boolean
+        required: true
+      devbox_run_terraform:
+        description: "The arguments to apply to execute devbox with"
+        type: string
+        required: true
+      environment_name:
+        description: "The environment to use"
+        type: string
         required: true
 
 jobs:
@@ -28,26 +32,253 @@ jobs:
       TF_VAR_github_owner_slug: "${{ github.repository_owner }}"
 
     steps:
+      - name: Generate Token
+        # Used to provide feedback
+        uses: actions/create-github-app-token@67018539274d69449ef7c02e8e71183d1719ab42 # v2.1.4
+        id: app-token
+        with:
+          app-id: "${{ secrets.BOT_APP_ID3 }}"
+          private-key: "${{ secrets.BOT_APP_PRIVATE_KEY3 }}"
+
+      - name: Generate Elevated Token
+        uses: actions/create-github-app-token@67018539274d69449ef7c02e8e71183d1719ab42 # v2.1.4
+        id: elevated-app-token
+        with:
+          app-id: "${{ secrets.BOT_APP_ID2 }}"
+          private-key: "${{ secrets.BOT_APP_PRIVATE_KEY2 }}"
+
       - name: Checkout
         id: checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         #with:
         #  token: "${{ steps.elevated-app-token.outputs.token }}"
 
-      - name: Check branch-head equals current checkout
-        id: is-latest-checkout
-        env:
-          BRANCH_NAME: ${{ github.ref }}
-          GITHUB_SHA: ${{ github.sha }}
+      - name: Install Devbox
+        uses: jetify-com/devbox-install-action@a0d2d53632934ae004f878c840055956d9f741b0 # v0.14.0
+        with:
+          enable-cache: 'true'
+          devbox-version: "0.16.0"
+
+      - name: Create Wrapper
+        uses: ./.github/actions/capture-wrapper
+        with:
+          command: "devbox"
+          wrapper: "devbox-w"
+
+      - name: Syntax Formatting
+        id: fmt
+        run: devbox-w run ${{ inputs.devbox_run_terraform }} fmt -recursive -check .
+        continue-on-error: true
+
+      - name: Initialize
+        id: init
+        run: devbox-w run ${{ inputs.devbox_run_terraform }} init -input=false
+
+      - name: Validate
+        id: validate
+        run: devbox-w run ${{ inputs.devbox_run_terraform }} validate
+
+      - name: Plan
+        id: plan
+        run: devbox run ${{ inputs.devbox_run_terraform }} plan -input=false -out=terraform.tfplan
+        continue-on-error: true
+
+      - name: Find PR
+        uses: jwalton/gh-find-current-pr@v1
+        id: findPR
+        with:
+          # Can be "open", "closed", or "all".  Defaults to "open".
+          state: open
+
+      - name: Plan Markdown
+        if: success() && steps.findPR.outputs.number
+        id: plan-md
         shell: bash
         run: |
           set -euo pipefail
 
-          ORIGIN_SHA=$(git ls-remote origin "${BRANCH_NAME}" | awk '{print $1}')
-          echo "current sha: ${GITHUB_SHA}"
-          echo "origin sha: ${ORIGIN_SHA}"
+          CAPTURE=$(mktemp -u)
+          devbox run ${{ inputs.devbox_run_terraform }} show -plan=terraform.tfplan -no-color > "${CAPTURE}"
+          read tf_add tf_change tf_destroy < <(sed -nE 's/^Plan: +([0-9]+) +to add, +([0-9]+) +to change, +([0-9]+) +to destroy.*/\1 \2 \3/p' "${CAPTURE}")
 
-          if [[ "${GITHUB_SHA}" != "${ORIGIN_SHA}" ]]; then
-            echo "current sha(${GITHUB_SHA}) is NOT the latest origin sha(${ORIGIN_SHA}) -- pipeline aborted."
-            exit 10
+          # Try to classify a color-code based on the outcome
+          if (( tf_add != 0 || tf_change != 0 )); then
+            emoji="🟨"
+          elif (( tf_destroy != 0 )); then
+            emoji="🟥"
+          else
+            emoji="🟩"
           fi
+
+          ## Process CAPTURE using `diff` highlighting
+          ##  Github diff highlighting only supports
+          ##  `+ add in green`
+          ##  `- delete in red`
+          ##  `! change in yellow`
+          ##  `# comment in gray`
+
+          ##
+          ## Process add/remove resources...
+          ##
+          # # github_actions_secret.encrypted_shared_secrets["shared#TF_VAR_terraform_statefile_bucket"] must be replaced
+          #-/+ resource "github_actions_secret" "encrypted_shared_secrets" {
+          #  ~ created_at       = "2025-11-12 19:50:20 +0000 UTC" -> (known after apply)
+          #  ~ encrypted_value  = (sensitive value) # forces replacement
+          #  ~ id               = "k6haze:TF_VAR_terraform_statefile_bucket" -> (known after apply)
+          #  ~ updated_at       = "2025-11-12 19:50:20 +0000 UTC" -> (known after apply)
+          #    # (3 unchanged attributes hidden)
+          #}
+          #
+          sed -i '/# forces replacement/ s/^ /-/' "${CAPTURE}"
+          sed -i '/^[[:space:]]*~/ s/^ /!/' "${CAPTURE}"
+          sed -i '/^-\/\+/ s/^/!/' "${CAPTURE}"
+
+          # Highlight comments
+          sed -i '/^[[:space:]]*#/ s/^ /#/' "${CAPTURE}"
+
+          ##
+          ## Destroy resources
+          ##
+          sed -i '/^[[:space:]]*-/ s/^ /-/' "${CAPTURE}"
+
+          ##
+          ## Add resources
+          ##
+          ## NOTE:  This line is a bit flacky and it'll match everything that
+          ##  does not contain a starting character.  hence, we add it as our last line
+          #  # github_actions_environment_secret.encrypted_secrets["curator#BOT_APP_ID"] will be created
+          #  + resource "github_actions_environment_secret" "encrypted_secrets" {
+          #      + created_at      = (known after apply)
+          #      + encrypted_value = (sensitive value)
+          #      + environment     = "curator"
+          #      + id              = (known after apply)
+          #      + repository      = "k6haze"
+          #      + secret_name     = "BOT_APP_ID"
+          #      + updated_at      = (known after apply)
+          #    }
+          sed -i '/^[[:space:]]*\+/ s/^ /\+/' "${CAPTURE}"
+
+          {
+            echo "markdown<<${CAPTURE}"
+            echo "#### Outcome: $emoji  add=$tf_add change=$tf_change destroy=$tf_destroy"
+            cat <<'EOL'
+          #### Terraform Format and Style 🖌`${{ steps.fmt.outcome }}`
+          #### Terraform Initialization ⚙️`${{ steps.init.outcome }}`
+          #### Terraform Validation 🤖`${{ steps.validate.outcome }}`
+          <details><summary>Validation Output</summary>
+
+          ```\n
+          ${{ steps.validate.outputs.stdout }}
+          ```
+
+          </details>
+
+          #### Terraform Plan 📖`${{ steps.plan.outcome }}`
+
+          <details><summary>Show Plan</summary>
+
+          ```diff
+          EOL
+            cat "${CAPTURE}"
+            cat <<'EOL'
+          ```
+
+          </details>
+
+          *Pusher: @${{ github.actor }}, Action: `${{ github.event_name }}`, Working Directory: `${{ env.tf_actions_working_dir }}`, Workflow: `${{ github.workflow }}`*`;
+          EOL
+            echo "${CAPTURE}" # Our ending marker
+          } >> "$GITHUB_OUTPUT"
+
+          rm "${CAPTURE}"
+
+
+      - name: "Update PR ${{ steps.findPR.outputs.number }}"
+        if: success() && steps.findPR.outputs.number
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+          number: ${{ steps.findPR.outputs.number }}
+          header: test
+          message: ${{ steps.plan-md.outputs.markdown }}
+#          message: |
+#            ```
+#            hello world
+#            ```
+
+        # TODO:
+        #   check outputs for this event
+        #   maybe add: - uses: hashicorp/setup-terraform@v3
+#      - name: Update Pull Request
+#        # Insipired by: https://github.com/marketplace/actions/hashicorp-setup-terraform#outputs
+#        uses: actions/github-script@v8
+#        #        if: github.event_name == 'pull_request' # This appears to be skipped
+#        env:
+#          PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
+#        with:
+#          github-token: ${{ steps.app-token.outputs.token }}
+#          script: |
+#            const prNumber = context.payload.pull_request?.number || context.issue.number;
+#            const commitId = context.payload.pull_request?.head.sha;
+#
+#            // 1. Retrieve existing bot comments for the PR
+#            const { data: comments } = await github.rest.pulls.listReviewComments({
+#              owner: context.repo.owner,
+#              repo: context.repo.repo,
+#              pull_number: 24, // context.issue.number,
+#            });
+#            const botComment = comments.find(comment => {
+#              return comment.user.type === 'Bot' && comment.body.includes('Terraform Format and Style')
+#            });
+#
+#            // 2. Prepare format of the comment
+#            const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
+#            #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
+#            #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
+#            <details><summary>Validation Output</summary>
+#
+#            \`\`\`\n
+#            ${{ steps.validate.outputs.stdout }}
+#            \`\`\`
+#
+#            </details>
+#
+#            #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+#
+#            <details><summary>Show Plan</summary>
+#
+#            \`\`\`\n
+#            ${process.env.PLAN}
+#            \`\`\`
+#
+#            </details>
+#
+#            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ env.tf_actions_working_dir }}\`, Workflow: \`${{ github.workflow }}\`*`;
+#
+#            // 3. If we have a comment, update it, otherwise create a new one
+#            if (botComment) {
+#              github.rest.pulls.updateReviewComment({
+#                owner: context.repo.owner,
+#                repo: context.repo.repo,
+#                comment_id: botComment.id,
+#                body: output
+#              });
+#            } else {
+#              github.rest.pulls.createReviewComment({
+#                pull_number: 24, // prNumber,
+#                owner: context.repo.owner,
+#                repo: context.repo.repo,
+#                commit_id: commitId,
+#                path: 'CHANGELOG.md',
+#                position: 1,
+#                body: output
+#              });
+#            }
+
+##      - name: Publish Test Results
+##        uses: EnricoMi/publish-unit-test-result-action@34d7c956a59aed1bfebf31df77b8de55db9bbaaf # v2.21.0
+##        if: always()
+##        with:
+##          check_run: false
+##          files: |
+##            report/*.xml
