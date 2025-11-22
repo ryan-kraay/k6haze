@@ -42,7 +42,7 @@ permissions:
 
 jobs:
   deploy-curator:
-    uses: ./.github/workflows/deploy-terraform.yaml
+    uses: .github/workflows/deploy-terraform.yaml
     with:
       environment: RKurator
       apply_terraform: false
