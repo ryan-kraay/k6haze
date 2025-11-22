@@ -44,7 +44,7 @@ jobs:
   deploy-curator:
     uses: ./.github/workflows/deploy-terraform.yaml
     with:
-      environment: RKurator
+      environment_name: RKurator
       apply_terraform: false
 
   deploy-github:
