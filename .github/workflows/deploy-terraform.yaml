@@ -1,0 +1,53 @@
+name: Terraform Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment_name:
+        description: "The environment to use"
+        type: string
+        required: true
+      apply_terraform:
+        description: "Apply changes?"
+        type: boolean
+        required: true
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    environment: ${{ input.environment }}
+
+    env:
+      AWS_ACCESS_KEY_ID: "${{ secrets.AWS_ACCESS_KEY_ID }}"
+      AWS_SECRET_ACCESS_KEY: "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+      #GITHUB_TOKEN: "${{ steps.elevated-app-token.outputs.token }}"
+      SOPS_AGE_KEY: "${{ secrets.SOPS_AGE_KEY }}"
+      TF_VAR_cloudflare_account_id: "${{ secrets.TF_VAR_cloudflare_account_id }}"
+      TF_VAR_terraform_statefile_bucket: "${{ secrets.TF_VAR_terraform_statefile_bucket }}"
+      TF_VAR_terraform_statefile_passphrase: "${{ secrets.TF_VAR_terraform_statefile_passphrase }}"
+      TF_VAR_github_owner_slug: "${{ github.repository_owner }}"
+
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        #with:
+        #  token: "${{ steps.elevated-app-token.outputs.token }}"
+
+      - name: Check branch-head equals current checkout
+        id: is-latest-checkout
+        env:
+          BRANCH_NAME: ${{ github.ref }}
+          GITHUB_SHA: ${{ github.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          ORIGIN_SHA=$(git ls-remote origin "${BRANCH_NAME}" | awk '{print $1}')
+          echo "current sha: ${GITHUB_SHA}"
+          echo "origin sha: ${ORIGIN_SHA}"
+
+          if [[ "${GITHUB_SHA}" != "${ORIGIN_SHA}" ]]; then
+            echo "current sha(${GITHUB_SHA}) is NOT the latest origin sha(${ORIGIN_SHA}) -- pipeline aborted."
+            exit 10
+          fi

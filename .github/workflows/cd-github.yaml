@@ -41,6 +41,12 @@ permissions:
   #variables: write
 
 jobs:
+  deploy-curator:
+    uses: ./.github/workflows/deploy-terraform.yaml
+    with:
+      environment: RKurator
+      apply_terraform: false
+
   deploy-github:
     name: Terraform
     runs-on: ubuntu-latest
