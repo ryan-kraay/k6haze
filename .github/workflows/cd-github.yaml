@@ -74,7 +74,7 @@ jobs:
     uses: ./.github/workflows/deploy-terraform.yaml
     needs: is-latest-checkout
     with:
-      environment_name: RKurator
+      environment_name: curator
       apply_terraform: false
       devbox_run_terraform: "tf-github"
-    secrets: inherit
+    secrets: inherit # share secrets with the reusable workflow

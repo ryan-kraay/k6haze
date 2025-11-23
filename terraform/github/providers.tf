@@ -31,13 +31,6 @@ terraform {
       source  = "integrations/github"
       version = "6.7.5"
     }
-    # hacky glue to encrypt secrets in a way that they don't end-up
-    # as plain-text in our tfstate file.
-    # See: https://github.com/integrations/terraform-provider-github/issues/888#issuecomment-1165984120
-    sodium = {
-      source  = "killmeplz/sodium"
-      version = "0.0.3"
-    }
   }
 }
 
@@ -49,5 +42,3 @@ provider "sops" {}
 provider "github" {
   owner = var.github_owner_slug
 }
-
-provider "sodium" {}

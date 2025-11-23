@@ -60,25 +60,6 @@ locals {
   shared_environment_name = "shared"
 }
 
-
-# Fetch the public github action key
-data "github_actions_public_key" "gha_public_key" {
-  repository = var.github_repo_name
-}
-
-# Encrypt our plain-text content with the gha-public-key
-#  WARNING:  We're trusting some unsigned random provider
-#    to encrypt our data.  I wouldn't use this in production, unless
-#    it was insourced and audited.
-# 
-# See: https://github.com/integrations/terraform-provider-github/issues/888
-data "sodium_encrypted_item" "secrets" {
-  for_each = { for k, env_secret in local.environment_secrets : k => env_secret.plaintext_value }
-
-  public_key_base64 = data.github_actions_public_key.gha_public_key.key
-  content_base64    = base64encode(each.value)
-}
-
 # Create the secret using our encrypted content
 #  (thus stored in the tfstate as encrypted content)
 resource "github_actions_secret" "encrypted_shared_secrets" {
@@ -86,7 +67,7 @@ resource "github_actions_secret" "encrypted_shared_secrets" {
 
   repository      = var.github_repo_name
   secret_name     = each.value.secret_name
-  encrypted_value = data.sodium_encrypted_item.secrets[each.key].encrypted_value_base64
+  plaintext_value = each.value.plaintext_value
 }
 
 resource "github_repository_environment" "environments" {
@@ -103,5 +84,5 @@ resource "github_actions_environment_secret" "encrypted_secrets" {
   environment = github_repository_environment.environments[each.value.env_name].environment
 
   secret_name     = each.value.secret_name
-  encrypted_value = data.sodium_encrypted_item.secrets[each.key].encrypted_value_base64
+  plaintext_value = each.value.plaintext_value
 }
