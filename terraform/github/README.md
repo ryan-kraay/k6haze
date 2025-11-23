@@ -118,6 +118,7 @@ It only has permissions to modify (take full ownership) of secrets within _this_
      2. `Contents`: `Read Only` # ???
      3. `Secrets`: `Read and Write`
      4. `Variables`: `Read and Write`
+     5. `Pull Requests`: `Read and Write` # To allow PR's to be updated to include Terraform Plan
  6. Create
  7. On the next page, you'll need to capture:
      1. The `App ID`
