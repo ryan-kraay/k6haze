@@ -73,7 +73,9 @@ jobs:
 
       - name: Plan
         id: plan
-        run: devbox run ${{ inputs.devbox_run_terraform }} plan -input=false -out=terraform.tfplan
+        run: devbox-w run ${{ inputs.devbox_run_terraform }} plan -input=false -out=terraform.tfplan
+        env:
+          GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
         continue-on-error: true
 
       - name: Find PR
