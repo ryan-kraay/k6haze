@@ -33,7 +33,9 @@ locals {
       #  basename: EXAMPLE.sops.raw
       #  split(".")[0]: EXAMPLE
       secret_name     = split(".", basename(file_name))[0]
-      plaintext_value = sensitive(sops.raw)
+      # For some reason, `sops.raw` includes a stray newline
+      #  TODO: isolate and create a bug report
+      plaintext_value = sensitive(chomp(sops.raw))
     } },
 
     # Process our *.sops.env files...
