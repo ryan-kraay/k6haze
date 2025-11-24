@@ -7,8 +7,8 @@ on:
         description: "Apply changes?"
         type: boolean
         required: true
-      devbox_run_terraform:
-        description: "The arguments to apply to execute devbox with"
+      terraform_project:
+        description: "The project name (ie: github, talos, k8s, etc)"
         type: string
         required: true
       environment_name:
@@ -24,12 +24,11 @@ jobs:
     env:
       AWS_ACCESS_KEY_ID: "${{ secrets.AWS_ACCESS_KEY_ID }}"
       AWS_SECRET_ACCESS_KEY: "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
-      #GITHUB_TOKEN: "${{ steps.elevated-app-token.outputs.token }}"
       SOPS_AGE_KEY: "${{ secrets.SOPS_AGE_KEY }}"
       TF_VAR_cloudflare_account_id: "${{ secrets.TF_VAR_cloudflare_account_id }}"
+      TF_VAR_github_owner_slug: "${{ github.repository_owner }}"
       TF_VAR_terraform_statefile_bucket: "${{ secrets.TF_VAR_terraform_statefile_bucket }}"
       TF_VAR_terraform_statefile_passphrase: "${{ secrets.TF_VAR_terraform_statefile_passphrase }}"
-      TF_VAR_github_owner_slug: "${{ github.repository_owner }}"
 
     steps:
       - name: Generate Token
@@ -60,20 +59,20 @@ jobs:
 
       - name: Syntax Formatting
         id: fmt
-        run: devbox-w run ${{ inputs.devbox_run_terraform }} fmt -recursive -check .
+        run: devbox-w run "tf-${{ inputs.terraform_project }}" fmt -recursive -check .
         continue-on-error: true
 
       - name: Initialize
         id: init
-        run: devbox-w run ${{ inputs.devbox_run_terraform }} init -input=false
+        run: devbox-w run "tf-${{ inputs.terraform_project }}" init -input=false
 
       - name: Validate
         id: validate
-        run: devbox-w run ${{ inputs.devbox_run_terraform }} validate
+        run: devbox-w run "tf-${{ inputs.terraform_project }}" validate
 
       - name: Plan
         id: plan
-        run: devbox-w run ${{ inputs.devbox_run_terraform }} plan -input=false -out=terraform.tfplan
+        run: devbox-w run "tf-${{ inputs.terraform_project }}" plan -input=false -out=terraform.tfplan
         env:
           GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
         continue-on-error: true
@@ -93,7 +92,7 @@ jobs:
           set -euo pipefail
 
           CAPTURE=$(mktemp -u)
-          devbox run ${{ inputs.devbox_run_terraform }} show -plan=terraform.tfplan -no-color > "${CAPTURE}"
+          devbox run "tf-${{ inputs.terraform_project }}" show -plan=terraform.tfplan -no-color > "${CAPTURE}"
           read tf_add tf_change tf_destroy < <(sed -nE 's/^Plan: +([0-9]+) +to add, +([0-9]+) +to change, +([0-9]+) +to destroy.*/\1 \2 \3/p' "${CAPTURE}")
 
           # Try to classify a color-code based on the outcome
@@ -189,17 +188,30 @@ jobs:
 
 
       - name: "Update PR ${{ steps.findPR.outputs.number }}"
+        id: plan-pr
         if: success() && steps.findPR.outputs.number
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
           number: ${{ steps.findPR.outputs.number }}
-          header: "${{ inputs.environment_name }}-${{ inputs.devbox_run_terraform }}"
+          header: "${{ inputs.environment_name }}-${{ inputs.terraform_project }}"
           message: ${{ steps.plan-md.outputs.markdown }}
 #          message: |
 #            ```
 #            hello world
 #            ```
+
+      - name: "Check Plan Results"
+        id: plan-check
+        # Terminate the pipeline if the plan had failed
+        run: "exit ${{ steps.plan.outputs.exit-code }}"
+
+      - name: Apply
+        id: apply
+        if: inputs.apply_terraform
+        run: devbox run "tf-${{ inputs.terraform_project }}" apply -input=false terraform.tfplan
+        env:
+          GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
 
         # TODO:
         #   check outputs for this event

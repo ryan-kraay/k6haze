@@ -76,5 +76,5 @@ jobs:
     with:
       environment_name: curator
       apply_terraform: false
-      devbox_run_terraform: "tf-github"
+      terraform_project: "github"
     secrets: inherit # share secrets with the reusable workflow
