@@ -90,7 +90,7 @@ jobs:
         id: plan-md
         shell: bash
         run: |
-          set -euo pipefail
+          set -exuo pipefail
 
           CAPTURE=$(mktemp -u)
           if [ -e "${TERRAFORM_TFPLAN}" ]; then
