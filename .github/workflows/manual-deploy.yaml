@@ -1,18 +1,23 @@
-name: Terraform Deploy
-run-name: "Deploy Github ${{github.ref_name}} #${{github.run_attempt}}"
+name: 🛠️ Terraform
+run-name: "Manual Terraform ${{github.ref_name}} #${{github.run_attempt}}"
 
 on:
-  push:
-    branches: ["main"]
-  pull_request:
-    types:
-      - opened
-      - synchronize
-      - reopened
-    branches:
-      - '**'
-#    paths:
-#      - terraform/github/**
+  workflow_dispatch:
+    inputs:
+      stack_name:
+        description: "The terraform configuration to run"
+        type: choice
+        required: true
+        default: "development-talos"
+        options:
+          - curator-github
+          - development-talos
+          - production-talos
+      apply_terraform:
+        description: "Apply changes?"
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   actions: write
@@ -54,12 +59,30 @@ jobs:
             echo "current sha(${GITHUB_SHA}) is NOT the latest origin sha(${ORIGIN_SHA}) -- pipeline aborted."
             exit 10
           fi
+  args:
+    name: "Parse Arguments"
+    runs-on: ubuntu-latest
 
-  deploy-curator:
+    outputs:
+      project_name: ${{ steps.split.outputs.project_name }}
+      environment_name: ${{ steps.split.outputs.environment_name }}
+    steps:
+      - name: Split
+        id: split
+        shell: bash
+        run: |
+          STACK_NAME="${{ inputs.stack_name }}"
+          echo "project_name=${STACK_NAME##*-}" >> "${GITHUB_OUTPUT}"
+          echo "environment_name=${STACK_NAME%-*}" >> "${GITHUB_OUTPUT}"
+
+
+  deploy:
     uses: ./.github/workflows/deploy-terraform.yaml
-    needs: is-latest-checkout
+    needs:
+      - is-latest-checkout
+      - args
     with:
-      environment_name: curator
-      apply_terraform: false
-      terraform_project: "github"
+      environment_name: ${{ needs.args.outputs.environment_name }}
+      apply_terraform: ${{ inputs.apply_terraform }}
+      terraform_project: ${{ needs.args.outputs.project_name }}
     secrets: inherit # share secrets with the reusable workflow
