@@ -93,17 +93,15 @@ jobs:
           set -exuo pipefail
 
           CAPTURE=$(mktemp -u)
-          if [ -e "${TERRAFORM_TFPLAN}" ]; then
-            devbox run "tf-${{ inputs.terraform_project }}" show "-plan=${TERRAFORM_TFPLAN}" -no-color > "${CAPTURE}"
-            read tf_add tf_change tf_destroy < <(sed -nE 's/^Plan: +([0-9]+) +to add, +([0-9]+) +to change, +([0-9]+) +to destroy.*/\1 \2 \3/p' "${CAPTURE}")
-          else
-            # Our plan does not exist, we'll assume that means no changes were necessary
-            echo "No plan found at ${TERRAFORM_TFPLAN} -- skipping"
-            touch "${CAPTURE}"
-            tf_add=0
-            tf_change=0
-            tf_destroy=0
-          fi
+          devbox run "tf-${{ inputs.terraform_project }}" show "-plan=${TERRAFORM_TFPLAN}" -no-color > "${CAPTURE}"
+          # There is a change our tfplan contains no work, therefore we'll
+          #   zero-out our counters
+          tf_add=0
+          tf_change=0
+          tf_destroy=0
+          set +e
+          read tf_add tf_change tf_destroy < <(sed -nE 's/^Plan: +([0-9]+) +to add, +([0-9]+) +to change, +([0-9]+) +to destroy.*/\1 \2 \3/p' "${CAPTURE}")
+          set -e
 
           # Try to classify a color-code based on the outcome
           if (( tf_add != 0 || tf_change != 0 )); then
@@ -218,18 +216,10 @@ jobs:
 
       - name: Apply
         id: apply
-        if: inputs.apply_terraform
+        if: success() && inputs.apply_terraform
+        run: devbox run "tf-${{ inputs.terraform_project }}" apply -input=false "${TERRAFORM_TFPLAN}"
         env:
           GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          if [ -e "${TERRAFORM_TFPLAN}" ]; then
-            devbox run "tf-${{ inputs.terraform_project }}" apply -input=false "${TERRAFORM_TFPLAN}"
-          else
-            echo "No plan found at ${TERRAFORM_TFPLAN} -- skipping"
-          fi
 
         # TODO:
         #   check outputs for this event
