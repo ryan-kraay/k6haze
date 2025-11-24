@@ -93,17 +93,17 @@ jobs:
           set -euo pipefail
 
           CAPTURE=$(mktemp -u)
-          # initialize our add/change/destroy count in case our tfplan does not exist
-          tf_add=0
-          tf_change=0
-          tf_destroy=0
-          # terraform.tfplan will NOT exist, if there are no changes
-          #   TODO:  replace this with a conditional (-e terraform.tfplan),
-          #     but that'll mean - terraform.tfplan will need to be in a fixed location
-          set +e
-          devbox run "tf-${{ inputs.terraform_project }}" show -plan=terraform.tfplan -no-color > "${CAPTURE}"
-          read tf_add tf_change tf_destroy < <(sed -nE 's/^Plan: +([0-9]+) +to add, +([0-9]+) +to change, +([0-9]+) +to destroy.*/\1 \2 \3/p' "${CAPTURE}")
-          set -e
+          if [ -e "${TERRAFORM_TFPLAN}" ]; then
+            devbox run "tf-${{ inputs.terraform_project }}" show "-plan=${TERRAFORM_TFPLAN}" -no-color > "${CAPTURE}"
+            read tf_add tf_change tf_destroy < <(sed -nE 's/^Plan: +([0-9]+) +to add, +([0-9]+) +to change, +([0-9]+) +to destroy.*/\1 \2 \3/p' "${CAPTURE}")
+          else
+            # Our plan does not exist, we'll assume that means no changes were necessary
+            echo "No plan found at ${TERRAFORM_TFPLAN} -- skipping"
+            touch "${CAPTURE}"
+            tf_add=0
+            tf_change=0
+            tf_destroy=0
+          fi
 
           # Try to classify a color-code based on the outcome
           if (( tf_add != 0 || tf_change != 0 )); then
@@ -219,9 +219,17 @@ jobs:
       - name: Apply
         id: apply
         if: inputs.apply_terraform
-        run: devbox run "tf-${{ inputs.terraform_project }}" apply -input=false terraform.tfplan
         env:
           GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [ -e "${TERRAFORM_TFPLAN}" ]; then
+            devbox run "tf-${{ inputs.terraform_project }}" apply -input=false "${TERRAFORM_TFPLAN}"
+          else
+            echo "No plan found at ${TERRAFORM_TFPLAN} -- skipping"
+          fi
 
         # TODO:
         #   check outputs for this event
