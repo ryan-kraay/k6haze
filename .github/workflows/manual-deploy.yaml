@@ -61,7 +61,7 @@ jobs:
           fi
   args:
     name: "Parse Arguments"
-    run-on: ubuntu-latest
+    runs-on: ubuntu-latest
 
     outputs:
       project_name: ${{ steps.split.outputs.project_name }}
