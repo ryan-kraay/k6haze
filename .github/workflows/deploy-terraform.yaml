@@ -92,7 +92,8 @@ jobs:
           set -euo pipefail
 
           CAPTURE=$(mktemp -u)
-          devbox run "tf-${{ inputs.terraform_project }}" show -plan=terraform.tfplan -no-color > "${CAPTURE}"
+          devbox run tf-${{ inputs.terraform_project }} show -plan=terraform.tfplan -no-color > "${CAPTURE}"
+          cat "RKR: ${CAPTURE}"
           read tf_add tf_change tf_destroy < <(sed -nE 's/^Plan: +([0-9]+) +to add, +([0-9]+) +to change, +([0-9]+) +to destroy.*/\1 \2 \3/p' "${CAPTURE}")
 
           # Try to classify a color-code based on the outcome
