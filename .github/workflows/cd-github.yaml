@@ -1,0 +1,80 @@
+name: Terraform Deploy on Github
+run-name: "Deploy Github ${{github.ref_name}} #${{github.run_attempt}}"
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+    branches:
+      - '**'
+#    paths:
+#      - terraform/github/**
+  workflow_dispatch:
+    inputs:
+      environment_name:
+        description: "The environment to use"
+        type: choice
+        required: true
+        default: "staging"
+        options:
+          - staging
+          - production
+      apply_terraform:
+        description: "Apply changes?"
+        type: boolean
+        required: false
+        default: false
+
+permissions:
+  actions: write
+  contents: write
+  issues: write
+  pull-requests: write
+  statuses: read
+  #contents: read
+  #environments: write
+  #secrets: write
+  #variables: write
+
+jobs:
+  is-latest-checkout:
+    name: "Check if current commit is latest"
+    # We want to avoid running terraform plan/apply on stale commits
+    #   this avoid accidently re-running an old GHA.
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Check branch-head equals current checkout
+        id: run-version-check
+        env:
+          BRANCH_NAME: ${{ github.ref }}
+          GITHUB_SHA: ${{ github.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          ORIGIN_SHA=$(git ls-remote origin "${BRANCH_NAME}" | awk '{print $1}')
+          echo "current sha: ${GITHUB_SHA}"
+          echo "origin sha: ${ORIGIN_SHA}"
+
+          if [[ "${GITHUB_SHA}" != "${ORIGIN_SHA}" ]]; then
+            echo "current sha(${GITHUB_SHA}) is NOT the latest origin sha(${ORIGIN_SHA}) -- pipeline aborted."
+            exit 10
+          fi
+
+  deploy-curator:
+    uses: ./.github/workflows/deploy-terraform.yaml
+    needs: is-latest-checkout
+    with:
+      environment_name: curator
+      apply_terraform: false
+      terraform_project: "github"
+    secrets: inherit # share secrets with the reusable workflow

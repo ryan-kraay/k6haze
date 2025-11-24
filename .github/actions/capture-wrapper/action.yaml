@@ -1,0 +1,82 @@
+name: "capture-wrapper"
+description: "Inspired by opentofu/setup-opentofu, hashicorp/setup-terraform, and mathiasvr/command-output.  This tool will generate a bash wrapper called <wrapper>, which will call <command> and lifestream stdout and stderr.  Afterwards, stdout and stderr will be available as outputs."
+inputs:
+  command:
+    description: 'The command to run (example: "devbox run tofu")'
+    required: true
+  wrapper:
+    required: true
+    description: 'Name of the wrapper script to create (example: "potato")'
+
+  outputs_stdout:
+    description: "The github outputs name for stdout."
+    required: false
+    default: "stdout"
+  outputs_stderr:
+    description: "The github outputs name for stderr."
+    required: false
+    default: "stderr"
+  outputs_exit_code:
+    description: "The applications captured exit code."
+    required: false
+    default: "exit-code"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Create wrapper script
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        BIN_DIR="${RUNNER_TEMP:-/tmp}/capture-wrapper/bin"
+        mkdir -p "${BIN_DIR}"
+        # Allow other steps _within_ this job to access our wrappers
+        echo "${BIN_DIR}" >> "$GITHUB_PATH"
+
+
+        WRAPPER_SCRIPT="${BIN_DIR}/${{ inputs.wrapper }}"
+
+        ##
+        ## BEGINNING OF THE GENERATED SHELL SCRPIT
+        ##
+        cat > "${WRAPPER_SCRIPT}" <<'EOF'
+        #!/usr/bin/env bash
+        set -euo pipefail
+
+        STDOUT_CAPTURE=$(mktemp -u)
+        STDERR_CAPTURE=$(mktemp -u)
+
+        set +e
+        stdbuf -oL -eL ${{ inputs.command }} "$@" 2> >(tee "${STDERR_CAPTURE}") > >(tee "${STDOUT_CAPTURE}")
+        xit=$?
+        set -e
+
+        # We use our STDOUT_CAPTURE as a tag - just to introduce a "random" tag to avoid output which _may_
+        #   contain common text like 'EOF' 'EOL', etc.
+        {
+          echo "${{ inputs.outputs_stdout }}<<${STDOUT_CAPTURE}"
+          cat "${STDOUT_CAPTURE}"
+          echo "${STDOUT_CAPTURE}"
+        } >> "$GITHUB_OUTPUT"
+
+        {
+          echo "${{ inputs.outputs_stderr }}<<${STDERR_CAPTURE}"
+          cat "${STDERR_CAPTURE}"
+          echo "${STDERR_CAPTURE}"
+        } >> "$GITHUB_OUTPUT"
+
+        echo "${{ inputs.outputs_exit_code }}=${xit}" >> "$GITHUB_OUTPUT"
+
+        # Cleanup
+        rm "${STDERR_CAPTURE}" "${STDOUT_CAPTURE}"
+
+        exit $xit
+        EOF
+        ##
+        ## END OF THE GENERATED SHELL SCRIPT
+        ##
+
+        chmod a+x "${WRAPPER_SCRIPT}"
+        echo "Generated ${WRAPPER_SCRIPT}"
+        cat "${WRAPPER_SCRIPT}"

@@ -2,25 +2,27 @@
   "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.16.0/.schema/devbox.schema.json",
   "packages": [
     "gitsign@0.13.0",
-    "cosign@2.6.1"
+    "cosign@2.6.1",
+    "sops@3.11.0",
+    "age@1.2.1",
   ],
   "env": {
     // avoid the need to choose our oauth when using sigstore
-    "GITSIGN_CONNECTOR_ID": "https://github.com/login/oauth"
+    "GITSIGN_CONNECTOR_ID": "https://github.com/login/oauth",
   },
   "shell": {
     "init_hook": [
-      "echo 'Welcome to devbox!' > /dev/null"
+      "echo 'Welcome to devbox!' > /dev/null",
     ],
     "scripts": {
       "test2": [
-        "echo \"Error: no test specified\" && exit 1"
+        "echo \"Error: no test specified\" && exit 1",
       ],
       "renovate": [
         // export GITHUB_COM_TOKEN=github_pat_XXXX
-        "docker run -it --rm -v $PWD:/repo -w /repo -e GITHUB_COM_TOKEN=${GITHUB_COM_TOKEN:-} -e LOG_LEVEL=debug renovate/renovate:latest --platform=local --repository-cache=reset \"${@}\""
-      ]
-    }
+        "docker run -it --rm -v $PWD:/repo -w /repo -e GITHUB_COM_TOKEN=${GITHUB_COM_TOKEN:-} -e LOG_LEVEL=debug renovate/renovate:latest --platform=local --repository-cache=reset \"${@}\"",
+      ],
+    },
   },
-  "include": [ "path:./devbox-plugins/common/plugin.json" ]
+  "include": ["path:./devbox-plugins/common/plugin.json"],
 }

@@ -50,6 +50,7 @@ permissions:
 jobs:
   renovate:
     name: Renovate
+    environment: renovate
     runs-on: ubuntu-latest
     steps:
       - name: Generate Token

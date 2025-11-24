@@ -1,0 +1,222 @@
+name: Terraform Deploy
+
+on:
+  workflow_call:
+    inputs:
+      apply_terraform:
+        description: "Apply changes?"
+        type: boolean
+        required: true
+      terraform_project:
+        description: "The project name (ie: github, talos, k8s, etc)"
+        type: string
+        required: true
+      environment_name:
+        description: "The environment to use"
+        type: string
+        required: true
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment_name }}
+
+    env:
+      AWS_ACCESS_KEY_ID: "${{ secrets.AWS_ACCESS_KEY_ID }}"
+      AWS_SECRET_ACCESS_KEY: "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+      SOPS_AGE_KEY: "${{ secrets.SOPS_AGE_KEY }}"
+      TERRAFORM_TFPLAN: "${{ github.workspace }}/terraform.tfplan"
+      TF_VAR_cloudflare_account_id: "${{ secrets.TF_VAR_cloudflare_account_id }}"
+      TF_VAR_github_owner_slug: "${{ github.repository_owner }}"
+      TF_VAR_terraform_statefile_bucket: "${{ secrets.TF_VAR_terraform_statefile_bucket }}"
+      TF_VAR_terraform_statefile_passphrase: "${{ secrets.TF_VAR_terraform_statefile_passphrase }}"
+
+    steps:
+      - name: Generate Token
+        # Used to provide feedback
+        uses: actions/create-github-app-token@67018539274d69449ef7c02e8e71183d1719ab42 # v2.1.4
+        id: app-token
+        with:
+          app-id: "${{ secrets.BOT_APP_ID }}"
+          private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
+
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        #with:
+        #  token: "${{ steps.elevated-app-token.outputs.token }}"
+
+      - name: Install Devbox
+        uses: jetify-com/devbox-install-action@a0d2d53632934ae004f878c840055956d9f741b0 # v0.14.0
+        with:
+          enable-cache: 'true'
+          devbox-version: "0.16.0"
+
+      - name: Create Wrapper
+        uses: ./.github/actions/capture-wrapper
+        with:
+          command: "devbox"
+          wrapper: "devbox-w"
+
+      - name: Syntax Formatting
+        id: fmt
+        run: devbox-w run "tf-${{ inputs.terraform_project }}" fmt -recursive -check .
+        continue-on-error: true
+
+      - name: Initialize
+        id: init
+        run: devbox-w run "tf-${{ inputs.terraform_project }}" init -input=false
+
+      - name: Validate
+        id: validate
+        run: devbox-w run "tf-${{ inputs.terraform_project }}" validate
+
+      - name: Plan
+        id: plan
+        run: devbox-w run "tf-${{ inputs.terraform_project }}" plan -input=false "-out=${TERRAFORM_TFPLAN}"
+        env:
+          GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
+        continue-on-error: true
+
+      - name: Find PR
+        uses: jwalton/gh-find-current-pr@v1
+        id: findPR
+        with:
+          # Can be "open", "closed", or "all".  Defaults to "open".
+          state: open
+
+      - name: Plan Markdown
+        if: success() && steps.findPR.outputs.number
+        id: plan-md
+        shell: bash
+        run: |
+          set -exuo pipefail
+
+          CAPTURE=$(mktemp -u)
+          devbox run "tf-${{ inputs.terraform_project }}" show "-plan=${TERRAFORM_TFPLAN}" -no-color > "${CAPTURE}"
+          # There is a change our tfplan contains no work, therefore we'll
+          #   zero-out our counters
+          tf_add=0
+          tf_change=0
+          tf_destroy=0
+          set +e
+          read tf_add tf_change tf_destroy < <(sed -nE 's/^Plan: +([0-9]+) +to add, +([0-9]+) +to change, +([0-9]+) +to destroy.*/\1 \2 \3/p' "${CAPTURE}")
+          set -e
+
+          # Try to classify a color-code based on the outcome
+          if (( tf_add != 0 || tf_change != 0 )); then
+            emoji="🟨"
+          elif (( tf_destroy != 0 )); then
+            emoji="🟥"
+          else
+            emoji="🟩"
+          fi
+
+          ## Process CAPTURE using `diff` highlighting
+          ##  Github diff highlighting only supports
+          ##  `+ add in green`
+          ##  `- delete in red`
+          ##  `! change in yellow`
+          ##  `# comment in gray`
+
+          ##
+          ## Process add/remove resources...
+          ##
+          # # github_actions_secret.encrypted_shared_secrets["shared#TF_VAR_terraform_statefile_bucket"] must be replaced
+          #-/+ resource "github_actions_secret" "encrypted_shared_secrets" {
+          #  ~ created_at       = "2025-11-12 19:50:20 +0000 UTC" -> (known after apply)
+          #  ~ encrypted_value  = (sensitive value) # forces replacement
+          #  ~ id               = "k6haze:TF_VAR_terraform_statefile_bucket" -> (known after apply)
+          #  ~ updated_at       = "2025-11-12 19:50:20 +0000 UTC" -> (known after apply)
+          #    # (3 unchanged attributes hidden)
+          #}
+          #
+          sed -i '/# forces replacement/ s/^ /-/' "${CAPTURE}"
+          sed -i '/^[[:space:]]*~/ s/^ /!/' "${CAPTURE}"
+          sed -i '/^-\/\+/ s/^/!/' "${CAPTURE}"
+
+          # Highlight comments
+          sed -i '/^[[:space:]]*#/ s/^ /#/' "${CAPTURE}"
+
+          ##
+          ## Destroy resources
+          ##
+          sed -i '/^[[:space:]]*-/ s/^ /-/' "${CAPTURE}"
+
+          ##
+          ## Add resources
+          ##
+          ## NOTE:  This line is a bit flacky and it'll match everything that
+          ##  does not contain a starting character.  hence, we add it as our last line
+          #  # github_actions_environment_secret.encrypted_secrets["curator#BOT_APP_ID"] will be created
+          #  + resource "github_actions_environment_secret" "encrypted_secrets" {
+          #      + created_at      = (known after apply)
+          #      + encrypted_value = (sensitive value)
+          #      + environment     = "curator"
+          #      + id              = (known after apply)
+          #      + repository      = "k6haze"
+          #      + secret_name     = "BOT_APP_ID"
+          #      + updated_at      = (known after apply)
+          #    }
+          sed -i '/^[[:space:]]*\+/ s/^ /\+/' "${CAPTURE}"
+
+          {
+            echo "markdown<<${CAPTURE}"
+            echo "#### Outcome: $emoji  add=$tf_add change=$tf_change destroy=$tf_destroy"
+            cat <<'EOL'
+          #### Terraform Format and Style 🖌`${{ steps.fmt.outcome }}`
+          #### Terraform Initialization ⚙️`${{ steps.init.outcome }}`
+          #### Terraform Validation 🤖`${{ steps.validate.outcome }}`
+          <details><summary>Validation Output</summary>
+
+          ```\n
+          ${{ steps.validate.outputs.stdout }}
+          ```
+
+          </details>
+
+          #### Terraform Plan 📖`${{ steps.plan.outcome }}`
+
+          <details><summary>Show Plan</summary>
+
+          ```diff
+          EOL
+            cat "${CAPTURE}"
+            cat <<'EOL'
+          ```
+
+          </details>
+
+          *Pusher: @${{ github.actor }}, Action: `${{ github.event_name }}`, Working Directory: `${{ env.tf_actions_working_dir }}`, Workflow: `${{ github.workflow }}`*`;
+          EOL
+            echo "${CAPTURE}" # Our ending marker
+          } >> "$GITHUB_OUTPUT"
+
+          rm "${CAPTURE}"
+
+
+      - name: "Update PR ${{ steps.findPR.outputs.number }}"
+        id: plan-pr
+        if: success() && steps.findPR.outputs.number
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+          number: ${{ steps.findPR.outputs.number }}
+          header: "${{ inputs.environment_name }}-${{ inputs.terraform_project }}"
+          message: ${{ steps.plan-md.outputs.markdown }}
+#          message: |
+#            ```
+#            hello world
+#            ```
+
+      - name: "Check Plan Results"
+        id: plan-check
+        # Terminate the pipeline if the plan had failed
+        run: "exit ${{ steps.plan.outputs.exit-code }}"
+
+      - name: Apply
+        id: apply
+        if: success() && inputs.apply_terraform
+        run: devbox run "tf-${{ inputs.terraform_project }}" apply -input=false "${TERRAFORM_TFPLAN}"
+        env:
+          GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
