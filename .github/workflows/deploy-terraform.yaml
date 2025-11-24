@@ -73,7 +73,7 @@ jobs:
 
       - name: Plan
         id: plan
-        run: devbox-w run "tf-${{ inputs.terraform_project }}" plan -input=false "-out=${ TERRAFORM_TFPLAN }"
+        run: devbox-w run "tf-${{ inputs.terraform_project }}" plan -input=false "-out=${TERRAFORM_TFPLAN}"
         env:
           GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
         continue-on-error: true
