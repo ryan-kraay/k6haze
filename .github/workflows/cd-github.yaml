@@ -24,12 +24,12 @@ permissions:
   #environments: write
   #secrets: write
   #variables: write
+ 
+env:
+  # Only apply terraform changes to the main branch
+  APPLY_TERRAFORM: ${{ github.ref == 'refs/heads/main' }}
 
 jobs:
-  env:
-    # Only apply terraform changes to the main branch
-    APPLY_TERRAFORM: ${{ github.ref == 'refs/heads/main' }}
-
   is-latest-checkout:
     name: "Check if current commit is latest"
     # We want to avoid running terraform plan/apply on stale commits
