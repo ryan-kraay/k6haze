@@ -26,6 +26,10 @@ permissions:
   #variables: write
 
 jobs:
+  env:
+    # Only apply terraform changes to the main branch
+    APPLY_TERRAFORM: ${{ github.ref == 'refs/heads/main' }}
+
   is-latest-checkout:
     name: "Check if current commit is latest"
     # We want to avoid running terraform plan/apply on stale commits
@@ -55,20 +59,20 @@ jobs:
             exit 10
           fi
 
-  deploy-curator:
+  deploy-github:
     uses: ./.github/workflows/deploy-terraform.yaml
     needs: is-latest-checkout
     with:
+      apply_terraform: ${{ env.APPLY_TERRAFORM }}
       environment_name: curator
-      apply_terraform: false
       terraform_project: "github"
     secrets: inherit # share secrets with the reusable workflow
 
   deploy-talos:
     uses: ./.github/workflows/deploy-terraform.yaml
-    needs: deploy-curator
+    needs: deploy-github
     with:
+      apply_terraform: ${{ env.APPLY_TERRAFORM }}
       environment_name: development
-      apply_terraform: false
       terraform_project: "talos"
     secrets: inherit # share secrets with the reusable workflow
