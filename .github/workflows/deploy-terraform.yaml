@@ -19,17 +19,43 @@ on:
 jobs:
   terraform:
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment_name }}
+    environment: "${{ inputs.environment_name }}-${{ inputs.terraform_project }}"
 
     env:
+      ##
+      ## Secrets are tricky.  We want to expose _specific_ secrets to terraform
+      ##   but these secrets vary from project to project.
+      ##
+      ## We could store all the secrets as terraform.tfvars, but then this makes
+      ##   decrypting and using these secrets for local development a bit more
+      ##   cumbersome.
+      ##
+      ## For the moment, we'll just include all the secrets for all our projects
+      ##   and wait for this to become an unmaintainble mess
+      ##
+
+      ##
+      ## Required For All
+      ##
       AWS_ACCESS_KEY_ID: "${{ secrets.AWS_ACCESS_KEY_ID }}"
       AWS_SECRET_ACCESS_KEY: "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
-      SOPS_AGE_KEY: "${{ secrets.SOPS_AGE_KEY }}"
       TERRAFORM_TFPLAN: "${{ github.workspace }}/terraform.tfplan"
       TF_VAR_cloudflare_account_id: "${{ secrets.TF_VAR_cloudflare_account_id }}"
-      TF_VAR_github_owner_slug: "${{ github.repository_owner }}"
       TF_VAR_terraform_statefile_bucket: "${{ secrets.TF_VAR_terraform_statefile_bucket }}"
       TF_VAR_terraform_statefile_passphrase: "${{ secrets.TF_VAR_terraform_statefile_passphrase }}"
+
+      ##
+      ## GitHub Project
+      ##
+      SOPS_AGE_KEY: "${{ secrets.SOPS_AGE_KEY }}"
+      TF_VAR_github_owner_slug: "${{ github.repository_owner }}"
+
+      ##
+      ## Talos Project
+      ##
+      TF_VAR_cluster_name: "${{ secrets.TF_VAR_cluster_name }}"
+      TF_VAR_master_node: "${{ secrets.TF_VAR_master_node }}"
+      TF_VAR_talos_version: "${{ secrets.TF_VAR_talos_version }}"
 
     steps:
       - name: Generate Token
@@ -60,20 +86,20 @@ jobs:
 
       - name: Syntax Formatting
         id: fmt
-        run: devbox-w run "tf-${{ inputs.terraform_project }}" fmt -recursive -check .
+        run: devbox-w run "${{ inputs.terraform_project }}-tf" fmt -recursive -check .
         continue-on-error: true
 
       - name: Initialize
         id: init
-        run: devbox-w run "tf-${{ inputs.terraform_project }}" init -input=false
+        run: devbox-w run "${{ inputs.terraform_project }}-tf" init -input=false
 
       - name: Validate
         id: validate
-        run: devbox-w run "tf-${{ inputs.terraform_project }}" validate
+        run: devbox-w run "${{ inputs.terraform_project }}-tf" validate
 
       - name: Plan
         id: plan
-        run: devbox-w run "tf-${{ inputs.terraform_project }}" plan -input=false "-out=${TERRAFORM_TFPLAN}"
+        run: devbox-w run "${{ inputs.terraform_project }}-tf" plan -input=false "-out=${TERRAFORM_TFPLAN}"
         env:
           GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
         continue-on-error: true
@@ -93,7 +119,7 @@ jobs:
           set -exuo pipefail
 
           CAPTURE=$(mktemp -u)
-          devbox run "tf-${{ inputs.terraform_project }}" show "-plan=${TERRAFORM_TFPLAN}" -no-color > "${CAPTURE}"
+          devbox run "${{ inputs.terraform_project }}-tf" show "-plan=${TERRAFORM_TFPLAN}" -no-color > "${CAPTURE}"
           # There is a change our tfplan contains no work, therefore we'll
           #   zero-out our counters
           tf_add=0
@@ -217,6 +243,6 @@ jobs:
       - name: Apply
         id: apply
         if: success() && inputs.apply_terraform
-        run: devbox run "tf-${{ inputs.terraform_project }}" apply -input=false "${TERRAFORM_TFPLAN}"
+        run: devbox run "${{ inputs.terraform_project }}-tf" apply -input=false "${TERRAFORM_TFPLAN}"
         env:
           GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"

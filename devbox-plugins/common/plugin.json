@@ -14,8 +14,14 @@
       "test": [
         "shellspec --format documentation \"${PROJECT_ROOT}\" \"${@}\""
       ],
-      "tf-github": [
+      "github-tf": [
         "tofu -chdir=\"$PWD/terraform/github\" \"${@}\""
+      ],
+      "k8s-tf": [
+        "tofu -chdir=\"$PWD/terraform/k8s\" \"${@}\""
+      ],
+      "talos-tf": [
+        "tofu -chdir=\"$PWD/terraform/talos\" \"${@}\""
       ]
     }
   }

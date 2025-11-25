@@ -24,7 +24,7 @@ permissions:
   #environments: write
   #secrets: write
   #variables: write
-
+ 
 jobs:
   is-latest-checkout:
     name: "Check if current commit is latest"
@@ -55,11 +55,20 @@ jobs:
             exit 10
           fi
 
-  deploy-curator:
+  deploy-github:
     uses: ./.github/workflows/deploy-terraform.yaml
     needs: is-latest-checkout
     with:
+      apply_terraform: ${{ github.ref == 'refs/heads/main' }}
       environment_name: curator
-      apply_terraform: false
       terraform_project: "github"
+    secrets: inherit # share secrets with the reusable workflow
+
+  deploy-talos:
+    uses: ./.github/workflows/deploy-terraform.yaml
+    needs: deploy-github
+    with:
+      apply_terraform: ${{ github.ref == 'refs/heads/main' }}
+      environment_name: development
+      terraform_project: "talos"
     secrets: inherit # share secrets with the reusable workflow
