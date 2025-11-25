@@ -5,3 +5,28 @@ variable "cloudflare_account_id" {
 variable "terraform_statefile_bucket" {
   description = "The name of the S3 bucket which will hold our tfstate file"
 }
+
+variable "export_configs" {
+  description = "Create the talosconfig and kubeconfig files"
+  default     = false
+}
+
+variable "talos_version" {
+  description = "The version of talos to deploy"
+  nullable    = false
+}
+
+variable "cluster_name" {
+  description = "The name of this kubernetes cluster"
+}
+
+variable "master_node" {
+  description = "Describe the master node"
+  type = object({
+    hostname    = string
+    fqdn        = string
+    ipaddresses = list(string)
+    gateway     = string
+  })
+  sensitive = true
+}
