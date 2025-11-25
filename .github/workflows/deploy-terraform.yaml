@@ -19,7 +19,7 @@ on:
 jobs:
   terraform:
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment_name }}
+    environment: "${{ inputs.environment_name }}-${{ inputs.terraform_project }}"
 
     env:
       ##
@@ -53,9 +53,9 @@ jobs:
       ##
       ## Talos Project
       ##
-      TF_VAR_talos_version: "${{ secrets.TF_VAR_talos_version }}"
       TF_VAR_cluster_name: "${{ secrets.TF_VAR_cluster_name }}"
       TF_VAR_master_node: "${{ secrets.TF_VAR_master_node }}"
+      TF_VAR_talos_version: "${{ secrets.TF_VAR_talos_version }}"
 
     steps:
       - name: Generate Token
