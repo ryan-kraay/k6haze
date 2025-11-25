@@ -63,3 +63,12 @@ jobs:
       apply_terraform: false
       terraform_project: "github"
     secrets: inherit # share secrets with the reusable workflow
+
+  deploy-talos:
+    uses: ./.github/workflows/deploy-terraform.yaml
+    needs: deploy-curator
+    with:
+      environment_name: development
+      apply_terraform: false
+      terraform_project: "talos"
+    secrets: inherit # share secrets with the reusable workflow
