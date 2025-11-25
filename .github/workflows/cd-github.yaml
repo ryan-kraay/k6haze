@@ -25,10 +25,6 @@ permissions:
   #secrets: write
   #variables: write
  
-env:
-  # Only apply terraform changes to the main branch
-  APPLY_TERRAFORM: ${{ github.ref == 'refs/heads/main' }}
-
 jobs:
   is-latest-checkout:
     name: "Check if current commit is latest"
@@ -63,7 +59,7 @@ jobs:
     uses: ./.github/workflows/deploy-terraform.yaml
     needs: is-latest-checkout
     with:
-      apply_terraform: ${{ env.APPLY_TERRAFORM }}
+      apply_terraform: ${{ github.ref == 'refs/heads/main' }}
       environment_name: curator
       terraform_project: "github"
     secrets: inherit # share secrets with the reusable workflow
@@ -72,7 +68,7 @@ jobs:
     uses: ./.github/workflows/deploy-terraform.yaml
     needs: deploy-github
     with:
-      apply_terraform: ${{ env.APPLY_TERRAFORM }}
+      apply_terraform: ${{ github.ref == 'refs/heads/main' }}
       environment_name: development
       terraform_project: "talos"
     secrets: inherit # share secrets with the reusable workflow
