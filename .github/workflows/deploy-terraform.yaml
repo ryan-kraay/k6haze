@@ -55,7 +55,7 @@ jobs:
       ##
       TF_VAR_talos_version: "${{ secrets.TF_VAR_talos_version }}"
       TF_VAR_cluster_name: "${{ secrets.TF_VAR_cluster_name }}"
-      TF_VAR_master_node: "${{ secrets.TF_VAR_master_node }"
+      TF_VAR_master_node: "${{ secrets.TF_VAR_master_node }}"
 
     steps:
       - name: Generate Token
