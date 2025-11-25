@@ -60,20 +60,20 @@ jobs:
 
       - name: Syntax Formatting
         id: fmt
-        run: devbox-w run "tf-${{ inputs.terraform_project }}" fmt -recursive -check .
+        run: devbox-w run "${{ inputs.terraform_project }}-tf" fmt -recursive -check .
         continue-on-error: true
 
       - name: Initialize
         id: init
-        run: devbox-w run "tf-${{ inputs.terraform_project }}" init -input=false
+        run: devbox-w run "${{ inputs.terraform_project }}-tf" init -input=false
 
       - name: Validate
         id: validate
-        run: devbox-w run "tf-${{ inputs.terraform_project }}" validate
+        run: devbox-w run "${{ inputs.terraform_project }}-tf" validate
 
       - name: Plan
         id: plan
-        run: devbox-w run "tf-${{ inputs.terraform_project }}" plan -input=false "-out=${TERRAFORM_TFPLAN}"
+        run: devbox-w run "${{ inputs.terraform_project }}-tf" plan -input=false "-out=${TERRAFORM_TFPLAN}"
         env:
           GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
         continue-on-error: true
@@ -93,7 +93,7 @@ jobs:
           set -exuo pipefail
 
           CAPTURE=$(mktemp -u)
-          devbox run "tf-${{ inputs.terraform_project }}" show "-plan=${TERRAFORM_TFPLAN}" -no-color > "${CAPTURE}"
+          devbox run "${{ inputs.terraform_project }}-tf" show "-plan=${TERRAFORM_TFPLAN}" -no-color > "${CAPTURE}"
           # There is a change our tfplan contains no work, therefore we'll
           #   zero-out our counters
           tf_add=0
@@ -217,6 +217,6 @@ jobs:
       - name: Apply
         id: apply
         if: success() && inputs.apply_terraform
-        run: devbox run "tf-${{ inputs.terraform_project }}" apply -input=false "${TERRAFORM_TFPLAN}"
+        run: devbox run "${{ inputs.terraform_project }}-tf" apply -input=false "${TERRAFORM_TFPLAN}"
         env:
           GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
