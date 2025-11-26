@@ -16,13 +16,12 @@ terraform {
     endpoints                   = { s3 = "https://${var.cloudflare_account_id}.r2.cloudflarestorage.com" }
   }
   required_providers {
-    talos = {
-      source = "siderolabs/talos"
-      version = "0.9.0"
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "2.38.0"
     }
   }
 }
 
-provider "talos" {
-  # Configuration options
+provider "kubernetes" {
 }
