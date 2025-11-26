@@ -15,13 +15,22 @@
         "shellspec --format documentation \"${PROJECT_ROOT}\" \"${@}\""
       ],
       "github-tf": [
-        "tofu -chdir=\"$PWD/terraform/github\" \"${@}\""
+        "tofu -chdir=\"${PROJECT_ROOT}/terraform/github\" \"${@}\""
+      ],
+      "github-spec": [
+        "shellspec --format documentation \"${PROJECT_ROOT}/terraform/github/spec\" \"${@}\""
       ],
       "k8s-tf": [
-        "tofu -chdir=\"$PWD/terraform/k8s\" \"${@}\""
+        "tofu -chdir=\"${PROJECT_ROOT}/terraform/k8s\" \"${@}\""
+      ],
+      "k8s-spec": [
+        "shellspec --format documentation \"${PROJECT_ROOT}/terraform/k8s/spec\" \"${@}\""
       ],
       "talos-tf": [
-        "tofu -chdir=\"$PWD/terraform/talos\" \"${@}\""
+        "tofu -chdir=\"${PROJECT_ROOT}/terraform/talos\" \"${@}\""
+      ],
+      "talos-spec": [
+        "shellspec --format documentation \"${PROJECT_ROOT}/terraform/talos/spec\" \"${@}\""
       ]
     }
   }
