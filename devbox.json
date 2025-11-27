@@ -4,7 +4,7 @@
     "age@1.2.1",
     "cosign@3.0.2",
     "gitsign@0.13.0",
-    "kubectl@1.34.1",
+    "kubectl@1.34.2",
     "sops@3.11.0",
     "talosctl@1.11.5",
   ],
