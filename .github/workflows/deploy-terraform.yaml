@@ -57,6 +57,11 @@ jobs:
       TF_VAR_master_node: "${{ secrets.TF_VAR_master_node }}"
       TF_VAR_talos_version: "${{ secrets.TF_VAR_talos_version }}"
 
+      ##
+      ## K8s Project
+      ##
+      KUBECONFIG: "${{ secrets.KUBECONFIG }}"
+
     steps:
       - name: Generate Token
         # Used to provide feedback
@@ -68,7 +73,7 @@ jobs:
 
       - name: Checkout
         id: checkout
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         #with:
         #  token: "${{ steps.elevated-app-token.outputs.token }}"
 

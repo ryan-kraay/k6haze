@@ -35,7 +35,7 @@ jobs:
     steps:
       - name: Checkout
         id: checkout
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - name: Check branch-head equals current checkout
         id: run-version-check
@@ -71,4 +71,13 @@ jobs:
       apply_terraform: ${{ github.ref == 'refs/heads/main' }}
       environment_name: development
       terraform_project: "talos"
+    secrets: inherit # share secrets with the reusable workflow
+
+  deploy-k8s:
+    uses: ./.github/workflows/deploy-terraform.yaml
+    needs: deploy-talos
+    with:
+      apply_terraform: ${{ github.ref == 'refs/heads/main' }}
+      environment_name: development
+      terraform_project: "k8s"
     secrets: inherit # share secrets with the reusable workflow
