@@ -72,3 +72,12 @@ jobs:
       environment_name: development
       terraform_project: "talos"
     secrets: inherit # share secrets with the reusable workflow
+
+  deploy-k8s:
+    uses: ./.github/workflows/deploy-terraform.yaml
+    needs: deploy-talos
+    with:
+      apply_terraform: ${{ github.ref == 'refs/heads/main' }}
+      environment_name: development
+      terraform_project: "k8s"
+    secrets: inherit # share secrets with the reusable workflow

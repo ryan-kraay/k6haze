@@ -57,6 +57,11 @@ jobs:
       TF_VAR_master_node: "${{ secrets.TF_VAR_master_node }}"
       TF_VAR_talos_version: "${{ secrets.TF_VAR_talos_version }}"
 
+      ##
+      ## K8s Project
+      ##
+      KUBECONFIG: "${{ secrets.KUBECONFIG }}"
+
     steps:
       - name: Generate Token
         # Used to provide feedback
