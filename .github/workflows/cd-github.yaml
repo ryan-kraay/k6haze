@@ -84,6 +84,9 @@ jobs:
           RESULT=$(cat changed_files.txt | .github/scripts/determine.sh)
           echo "changes=$RESULT" >> $GITHUB_OUTPUT
 
+  ##
+  ## GitHub
+  ##
   deploy-github:
     uses: ./.github/workflows/deploy-terraform.yaml
     needs: determine-changes
@@ -94,7 +97,7 @@ jobs:
       terraform_project: "github"
     secrets: inherit # share secrets with the reusable workflow
 
-  deploy-github-spec:
+  deploy-github-test:
     uses: ./.github/workflows/run-spec.yaml
     needs: [determine-changes, deploy-github]
     if: |
@@ -105,12 +108,15 @@ jobs:
       terraform_project: "github"
     secrets: inherit # share secrets with the reusable workflow
 
+  ##
+  ## Talos
+  ##
   deploy-talos:
     uses: ./.github/workflows/deploy-terraform.yaml
     needs: [determine-changes, deploy-github-spec]
-    # run this unless deploy-github-spec failed or was cancelled
+    # run this unless deploy-github-test failed or was cancelled
     if: |
-      always() && (needs.deploy-github-spec.result == 'success' || needs.deploy-github-spec.result == 'skipped') &&
+      always() && (needs.deploy-github-test.result == 'success' || needs.deploy-github-test.result == 'skipped') &&
       fromJSON(needs.determine-changes.outputs.changes).changed_talos == true
     with:
       apply_terraform: ${{ github.ref == 'refs/heads/main' }}
