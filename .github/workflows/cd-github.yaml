@@ -94,6 +94,17 @@ jobs:
       terraform_project: "github"
     secrets: inherit # share secrets with the reusable workflow
 
+  deploy-github-spec:
+    uses: ./.github/workflows/run-spec.yaml
+    needs: [determine-changes, deploy-github]
+    if: |
+      always() && (needs.deploy-github.result == 'success' || needs.deploy-github.result == 'skipped') &&
+      fromJSON(needs.determine-changes.outputs.changes).changed_github_spec == true
+    with:
+      environment_name: curator
+      terraform_project: "github"
+    secrets: inherit # share secrets with the reusable workflow
+
   deploy-talos:
     uses: ./.github/workflows/deploy-terraform.yaml
     needs: [determine-changes, deploy-github]
