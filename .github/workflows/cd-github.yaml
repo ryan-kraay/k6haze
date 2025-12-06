@@ -107,10 +107,10 @@ jobs:
 
   deploy-talos:
     uses: ./.github/workflows/deploy-terraform.yaml
-    needs: [determine-changes, deploy-github]
-    # run this unless deploy-github failed or was cancelled
+    needs: [determine-changes, deploy-github-spec]
+    # run this unless deploy-github-spec failed or was cancelled
     if: |
-      always() && (needs.deploy-github.result == 'success' || needs.deploy-github.result == 'skipped') &&
+      always() && (needs.deploy-github-spec.result == 'success' || needs.deploy-github-spec.result == 'skipped') &&
       fromJSON(needs.determine-changes.outputs.changes).changed_talos == true
     with:
       apply_terraform: ${{ github.ref == 'refs/heads/main' }}
