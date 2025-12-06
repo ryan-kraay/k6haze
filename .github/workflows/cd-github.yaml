@@ -113,7 +113,7 @@ jobs:
   ##
   deploy-talos:
     uses: ./.github/workflows/deploy-terraform.yaml
-    needs: [determine-changes, deploy-github-spec]
+    needs: [determine-changes, deploy-github-test]
     # run this unless deploy-github-test failed or was cancelled
     if: |
       always() && (needs.deploy-github-test.result == 'success' || needs.deploy-github-test.result == 'skipped') &&
