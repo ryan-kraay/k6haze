@@ -97,8 +97,8 @@ jobs:
   deploy-talos:
     uses: ./.github/workflows/deploy-terraform.yaml
     needs: [determine-changes, deploy-github]
+    # run this unless deploy-github failed or was cancelled
     if: |
-      # run this unless deploy-github failed or was cancelled
       always() && (needs.deploy-github.result == 'success' || needs.deploy-github.result == 'skipped') &&
       fromJSON(needs.determine-changes.outputs.changes).changed_talos == true
     with:
@@ -110,8 +110,8 @@ jobs:
   deploy-k8s:
     uses: ./.github/workflows/deploy-terraform.yaml
     needs: [determine-changes, deploy-talos]
+    # run this unless deploy-talos failed or was cancelled
     if: |
-      # run this unless deploy-talos failed or was cancelled
       always() && (needs.deploy-talos.result == 'success' || needs.deploy-talos.result == 'skipped') &&
       fromJSON(needs.determine-changes.outputs.changes).changed_k8s == true
     with:
