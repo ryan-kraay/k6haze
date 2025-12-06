@@ -124,15 +124,39 @@ jobs:
       terraform_project: "talos"
     secrets: inherit # share secrets with the reusable workflow
 
-  deploy-k8s:
-    uses: ./.github/workflows/deploy-terraform.yaml
+  deploy-talos-test:
+    uses: ./.github/workflows/run-spec.yaml
     needs: [determine-changes, deploy-talos]
-    # run this unless deploy-talos failed or was cancelled
     if: |
       always() && (needs.deploy-talos.result == 'success' || needs.deploy-talos.result == 'skipped') &&
+      fromJSON(needs.determine-changes.outputs.changes).changed_talos_spec == true
+    with:
+      environment_name: curator
+      terraform_project: "talos"
+    secrets: inherit # share secrets with the reusable workflow
+  ##
+  ## Kubernetes
+  ##
+  deploy-k8s:
+    uses: ./.github/workflows/deploy-terraform.yaml
+    needs: [determine-changes, deploy-talos-test]
+    # run this unless deploy-talos-test failed or was cancelled
+    if: |
+      always() && (needs.deploy-talos-test.result == 'success' || needs.deploy-talos-test.result == 'skipped') &&
       fromJSON(needs.determine-changes.outputs.changes).changed_k8s == true
     with:
       apply_terraform: ${{ github.ref == 'refs/heads/main' }}
       environment_name: development
+      terraform_project: "k8s"
+    secrets: inherit # share secrets with the reusable workflow
+
+  deploy-k8s-test:
+    uses: ./.github/workflows/run-spec.yaml
+    needs: [determine-changes, deploy-k8s]
+    if: |
+      always() && (needs.deploy-k8s.result == 'success' || needs.deploy-k8s.result == 'skipped') &&
+      fromJSON(needs.determine-changes.outputs.changes).changed_k8s_spec == true
+    with:
+      environment_name: curator
       terraform_project: "k8s"
     secrets: inherit # share secrets with the reusable workflow
