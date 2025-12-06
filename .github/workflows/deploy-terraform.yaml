@@ -251,3 +251,15 @@ jobs:
         run: devbox run "${{ inputs.terraform_project }}-tf" apply -input=false "${TERRAFORM_TFPLAN}"
         env:
           GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
+
+      - name: "Spec Test"
+        id: spec-test
+        run: devbox run "${{ inputs.terraform_project }}-spec" --output junit
+
+      - name: "Publish Spec Results"
+        uses: EnricoMi/publish-unit-test-result-action@34d7c956a59aed1bfebf31df77b8de55db9bbaaf # v2.21.0
+        if: always()
+        with:
+          check_run: false
+          files: |
+            report/*.xml
