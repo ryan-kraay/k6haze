@@ -58,7 +58,6 @@ jobs:
   determine-changes:
     name: "Determine what changed"
     runs-on: ubuntu-latest
-    needs: is-latest-checkout
     outputs:
       changes: ${{ steps.determine.outputs.changes }}
     steps:
@@ -89,7 +88,7 @@ jobs:
   ##
   deploy-github:
     uses: ./.github/workflows/deploy-terraform.yaml
-    needs: determine-changes
+    needs: [determine-changes, is-latest-checkout]
     if: fromJSON(needs.determine-changes.outputs.changes).changed_github == true
     with:
       apply_terraform: ${{ github.ref == 'refs/heads/main' }}
