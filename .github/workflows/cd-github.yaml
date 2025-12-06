@@ -86,7 +86,8 @@ jobs:
 
   deploy-github:
     uses: ./.github/workflows/deploy-terraform.yaml
-    needs: is-latest-checkout
+    needs: determine-changes
+    if: fromJSON(needs.determine-changes.outputs.changes).changed_github == true
     with:
       apply_terraform: ${{ github.ref == 'refs/heads/main' }}
       environment_name: curator
@@ -95,7 +96,11 @@ jobs:
 
   deploy-talos:
     uses: ./.github/workflows/deploy-terraform.yaml
-    needs: deploy-github
+    needs: [determine-changes, deploy-github]
+    if: |
+      # run this unless deploy-github failed or was cancelled
+      always() && (needs.deploy-github.result == 'success' || needs.deploy-github.result == 'skipped') &&
+      fromJSON(needs.determine-changes.outputs.changes).changed_talos == true
     with:
       apply_terraform: ${{ github.ref == 'refs/heads/main' }}
       environment_name: development
@@ -104,7 +109,11 @@ jobs:
 
   deploy-k8s:
     uses: ./.github/workflows/deploy-terraform.yaml
-    needs: deploy-talos
+    needs: [determine-changes, deploy-talos]
+    if: |
+      # run this unless deploy-talos failed or was cancelled
+      always() && (needs.deploy-talos.result == 'success' || needs.deploy-talos.result == 'skipped') &&
+      fromJSON(needs.determine-changes.outputs.changes).changed_k8s == true
     with:
       apply_terraform: ${{ github.ref == 'refs/heads/main' }}
       environment_name: development
