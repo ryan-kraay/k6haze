@@ -82,6 +82,7 @@ jobs:
         with:
           enable-cache: 'true'
           devbox-version: "0.16.0"
+          project-path: ".github/"
 
       - name: Create Wrapper
         uses: ./.github/actions/capture-wrapper
