@@ -99,7 +99,7 @@ jobs:
 
       - name: "Spec Test"
         id: spec-test
-        run: devbox-w -c ".github/devbox.json" run "${{ inputs.terraform_project }}-spec" --output junit
+        run: devbox-w -c ".github/devbox.json" run "${{ inputs.terraform_project }}-spec" -- --output junit
         continue-on-error: true
 
       - name: "Publish Spec Results"
