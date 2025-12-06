@@ -1,6 +1,7 @@
 Describe "determine"
 
-  Include "$SHELLSPEC_HELPERDIR/../../../.github/scripts/determine.sh"
+  #Include "$SHELLSPEC_HELPERDIR/../.github/scripts/determine.sh"
+  Include ".github/scripts/determine.sh"
 
   Describe "with no input"
     Data

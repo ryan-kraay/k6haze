@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "A list of tools shared between the k6haze development and automatic testing pipelines.",
   "packages": [
+    "jq@1.8.1",
     "opentofu@1.10.7",
     "shellspec@0.28.1"
   ],
@@ -18,19 +19,19 @@
         "tofu -chdir=\"${PROJECT_ROOT}/terraform/github\" \"${@}\""
       ],
       "github-spec": [
-        "shellspec -c \"${PROJECT_ROOT}/terraform/github\"  --format documentation \"${@}\""
+        "shellspec \"${PROJECT_ROOT}/terraform/github\"  --format documentation \"${@}\""
       ],
       "k8s-tf": [
         "tofu -chdir=\"${PROJECT_ROOT}/terraform/k8s\" \"${@}\""
       ],
       "k8s-spec": [
-        "shellspec -c \"${PROJECT_ROOT}/terraform/k8s\"  --format documentation \"${@}\""
+        "shellspec \"${PROJECT_ROOT}/terraform/k8s\"  --format documentation \"${@}\""
       ],
       "talos-tf": [
         "tofu -chdir=\"${PROJECT_ROOT}/terraform/talos\" \"${@}\""
       ],
       "talos-spec": [
-        "shellspec -c \"${PROJECT_ROOT}/terraform/talos\" --format documentation \"${@}\""
+        "shellspec \"${PROJECT_ROOT}/terraform/talos\" --format documentation \"${@}\""
       ]
     }
   }
