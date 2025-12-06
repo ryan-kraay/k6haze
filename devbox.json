@@ -28,6 +28,17 @@
         // export GITHUB_COM_TOKEN=github_pat_XXXX
         "docker run -it --rm -v $PWD:/repo -w /repo -e GITHUB_COM_TOKEN=${GITHUB_COM_TOKEN:-} -e LOG_LEVEL=debug renovate/renovate:latest --platform=local --repository-cache=reset \"${@}\"",
       ],
+      "kiro-cli": [
+	// installation was clunky:
+	//   I launched a docker image, ran `apt install curl ca-certificates unzip --no-install-recommends` then copied $HOME/.local/bin /code/.local/bin
+	//
+	// authentication was clunky (a browser is needed), so I just ran
+	// devbox shell && export HOME=$(pwd) && firefox & && ./.local/bin/kiro-cli login
+	//
+	// TODO:  Maybe try to create a custom Dockerfile via devbox
+	//
+	"docker run -it --rm --env HOME=/code --env PATH=/code/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin --workdir=/code --user $(id -u):$(id -g) -v $PWD:/code ubuntu:20.04 /bin/bash"
+      ],
     },
   },
   "include": ["path:./devbox-plugins/common/plugin.json"],
