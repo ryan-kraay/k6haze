@@ -29,7 +29,7 @@ terraform {
     # necessary to modify our gitrepo
     github = {
       source  = "integrations/github"
-      version = "6.8.3"
+      version = "6.9.0"
     }
   }
 }
