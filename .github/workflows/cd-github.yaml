@@ -90,7 +90,7 @@ jobs:
   run-root-spec:
     uses: ./.github/workflows/ci-pipeline.yaml
     needs: [determine-changes, is-latest-checkout]
-    if: fromJSON(needs.determine-changes.outputs.changes).changed_root_spec
+    if: fromJSON(needs.determine-changes.outputs.changes).changed_root_spec == true
 
   ##
   ## GitHub
@@ -102,7 +102,7 @@ jobs:
       fromJSON(needs.determine-changes.outputs.changes).changed_github == true ||
       fromJSON(needs.determine-changes.outputs.changes).changed_github_spec == true
     with:
-      apply_terraform: "true" # secrets will always be applied, as they'll be needed further in our pipeline
+      apply_terraform: true # secrets will always be applied, as they'll be needed further in our pipeline
       run_terraform: ${{ fromJSON(needs.determine-changes.outputs.changes).changed_github }}
       run_specs: ${{ fromJSON(needs.determine-changes.outputs.changes).changed_github_spec }}
       environment_name: curator
