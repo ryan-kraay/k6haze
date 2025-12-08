@@ -146,3 +146,26 @@ jobs:
       environment_name: development
       terraform_project: "k8s"
     secrets: inherit # share secrets with the reusable workflow
+
+  ##
+  ## Gate: All checks must pass
+  ##
+  all-checks-passed:
+    runs-on: ubuntu-latest
+    needs: [run-root-spec, deploy-github, deploy-talos, deploy-k8s]
+    if: always()
+    steps:
+      - name: Check all jobs
+        run: |
+          if [[ "${{ needs.run-root-spec.result }}" == "failure" ]] || \
+             [[ "${{ needs.deploy-github.result }}" == "failure" ]] || \
+             [[ "${{ needs.deploy-talos.result }}" == "failure" ]] || \
+             [[ "${{ needs.deploy-k8s.result }}" == "failure" ]]; then
+            echo "One or more jobs failed:"
+            echo "  run-root-spec: ${{ needs.run-root-spec.result }}"
+            echo "  deploy-github: ${{ needs.deploy-github.result }}"
+            echo "  deploy-talos: ${{ needs.deploy-talos.result }}"
+            echo "  deploy-k8s: ${{ needs.deploy-k8s.result }}"
+            exit 1
+          fi
+          echo "All jobs passed or were skipped successfully"
