@@ -8,6 +8,7 @@ Describe "determine"
     End
     It "returns all false"
       When call determine_changes
+      The output as jq ".changed_root_spec" should equal "false"
       The output as jq ".changed_github" should equal "false"
       The output as jq ".changed_github_spec" should equal "false"
       The output as jq ".changed_talos" should equal "false"
@@ -45,12 +46,29 @@ Describe "determine"
     End
   End
 
+  Describe "when root spec changes"
+    Data
+      #|spec/something_spec.sh
+    End
+    It "sets only changed_root_spec"
+      When call determine_changes
+      The output as jq ".changed_root_spec" should equal "true"
+      The output as jq ".changed_github" should equal "false"
+      The output as jq ".changed_github_spec" should equal "false"
+      The output as jq ".changed_talos" should equal "false"
+      The output as jq ".changed_talos_spec" should equal "false"
+      The output as jq ".changed_k8s" should equal "false"
+      The output as jq ".changed_k8s_spec" should equal "false"
+    End
+  End
+
   Describe "when github changes"
     Data
       #|terraform/github/main.tf
     End
     It "sets flags for talos and k8s"
       When call determine_changes
+      The output as jq ".changed_root_spec" should equal "false"
       The output as jq ".changed_github" should equal "true"
       The output as jq ".changed_github_spec" should equal "true"
       The output as jq ".changed_talos" should equal "true"
@@ -66,6 +84,7 @@ Describe "determine"
     End
     It "sets flags for k8s"
       When call determine_changes
+      The output as jq ".changed_root_spec" should equal "false"
       The output as jq ".changed_github" should equal "false"
       The output as jq ".changed_github_spec" should equal "false"
       The output as jq ".changed_talos" should equal "true"
@@ -81,6 +100,7 @@ Describe "determine"
     End
     It "sets no additional flags"
       When call determine_changes
+      The output as jq ".changed_root_spec" should equal "false"
       The output as jq ".changed_github" should equal "false"
       The output as jq ".changed_github_spec" should equal "false"
       The output as jq ".changed_talos" should equal "false"
@@ -98,6 +118,7 @@ Describe "determine"
     End
     It "sets no changes"
       When call determine_changes
+      The output as jq ".changed_root_spec" should equal "false"
       The output as jq ".changed_github" should equal "false"
       The output as jq ".changed_github_spec" should equal "false"
       The output as jq ".changed_talos" should equal "false"
@@ -113,6 +134,7 @@ Describe "determine"
     End
     It "sets all changes"
       When call determine_changes
+      The output as jq ".changed_root_spec" should equal "true"
       The output as jq ".changed_github" should equal "true"
       The output as jq ".changed_github_spec" should equal "true"
       The output as jq ".changed_talos" should equal "true"
