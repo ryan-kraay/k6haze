@@ -114,10 +114,11 @@ jobs:
   ##
   deploy-talos:
     uses: ./.github/workflows/deploy-terraform.yaml
-    needs: [determine-changes, deploy-github]
-    # run this unless deploy-github failed or was cancelled
+    needs: [determine-changes, is-latest-checkout, deploy-github]
+    # run this unless deploy-github failed or was cancelled (but we need to assert that the other deps were ran)
     if: |
-      always() && (needs.deploy-github.result == 'success' || needs.deploy-github.result == 'skipped') &&
+      always() && (needs.determine-changes.result == 'success' && needs.is-latest-checkout.result == 'success') &&
+      (needs.deploy-github.result == 'success' || needs.deploy-github.result == 'skipped') &&
       (fromJSON(needs.determine-changes.outputs.changes).changed_talos == true ||
        fromJSON(needs.determine-changes.outputs.changes).changed_talos_spec == true)
     with:
@@ -133,10 +134,11 @@ jobs:
   ##
   deploy-k8s:
     uses: ./.github/workflows/deploy-terraform.yaml
-    needs: [determine-changes, deploy-talos]
+    needs: [determine-changes, is-latest-checkout, deploy-talos]
     # run this unless deploy-talos failed or was cancelled
     if: |
-      always() && (needs.deploy-talos.result == 'success' || needs.deploy-talos.result == 'skipped') &&
+      always() && (needs.determine-changes.result == 'success' && needs.is-latest-checkout.result == 'success') &&
+      (needs.deploy-talos.result == 'success' || needs.deploy-talos.result == 'skipped') &&
       (fromJSON(needs.determine-changes.outputs.changes).changed_k8s == true ||
        fromJSON(needs.determine-changes.outputs.changes).changed_k8s_spec == true)
     with:
@@ -152,12 +154,14 @@ jobs:
   ##
   all-checks-passed:
     runs-on: ubuntu-latest
-    needs: [run-root-spec, deploy-github, deploy-talos, deploy-k8s]
+    needs: [determine-changes, is-latest-checkout, run-root-spec, deploy-github, deploy-talos, deploy-k8s]
     if: always()
     steps:
       - name: Check all jobs
         run: |
-          if [[ "${{ needs.run-root-spec.result }}" == "failure" ]] || \
+          if [[ "${{ needs.determine-changes.result }}" == "failure" ]] || \
+             [[ "${{ needs.is-latest-checkout.result }}" == "failure" ]] || \
+             [[ "${{ needs.run-root-spec.result }}" == "failure" ]] || \
              [[ "${{ needs.deploy-github.result }}" == "failure" ]] || \
              [[ "${{ needs.deploy-talos.result }}" == "failure" ]] || \
              [[ "${{ needs.deploy-k8s.result }}" == "failure" ]]; then
