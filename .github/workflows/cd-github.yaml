@@ -84,6 +84,14 @@ jobs:
           echo "changes=$RESULT" >> $GITHUB_OUTPUT
 
   ##
+  ## Root Specs
+  ##
+  run-root-spec:
+    uses: ./.github/workflows/ci-pipeline.yaml
+    needs: [determine-changes, is-latest-checkout]
+    if: fromJSON(needs.determine-changes.outputs.changes).changed_root_spec == true
+
+  ##
   ## GitHub
   ##
   deploy-github:

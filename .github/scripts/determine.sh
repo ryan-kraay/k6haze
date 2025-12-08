@@ -9,6 +9,7 @@ info() {
 
 determine_changes() {
   declare -A changes=(
+    [changed_root_spec]=false
     [changed_github]=false
     [changed_github_spec]=false
     [changed_talos]=false
@@ -20,6 +21,10 @@ determine_changes() {
   while IFS= read -r file; do
     info "Processing file: $file"
     case "$file" in
+      spec/*)
+        info "...matched root spec"
+        changes["changed_root_spec"]=true
+        ;;
       terraform/*/spec/*)
         project=$(echo "$file" | cut -d/ -f2)
         info "...matched spec for project: $project"
@@ -41,6 +46,7 @@ determine_changes() {
         # In the event that "something" outside of terraform changed (ie: devbox.json)
         #  we will retrigger a terraform deployment of everything
         info "...unknown file. Marking everything as changed"
+        changes["changed_root_spec"]=true
         for project in github talos k8s; do
           changes["changed_${project}"]=true
           changes["changed_${project}_spec"]=true
