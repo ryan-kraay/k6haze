@@ -7,6 +7,14 @@ on:
         description: "Apply changes?"
         type: boolean
         required: true
+      run_terraform:
+        description: "Run terraform plan/apply?"
+        type: boolean
+        required: true
+      run_specs:
+        description: "Run spec tests?"
+        type: boolean
+        required: true
       terraform_project:
         description: "The project name (ie: github, talos, k8s, etc)"
         type: string
@@ -65,7 +73,7 @@ jobs:
     steps:
       - name: Generate Token
         # Used to provide feedback
-        uses: actions/create-github-app-token@7e473efe3cb98aa54f8d4bac15400b15fad77d94 # v2.2.0
+        uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
         id: app-token
         with:
           app-id: "${{ secrets.BOT_APP_ID }}"
@@ -92,19 +100,23 @@ jobs:
 
       - name: Syntax Formatting
         id: fmt
+        if: inputs.run_terraform
         run: devbox-w -c ".github/devbox.json" run "${{ inputs.terraform_project }}-tf" -- fmt -recursive -check .
         continue-on-error: true
 
       - name: Initialize
         id: init
+        if: inputs.run_terraform
         run: devbox-w -c ".github/devbox.json" run "${{ inputs.terraform_project }}-tf" -- init -input=false
 
       - name: Validate
         id: validate
+        if: steps.init.outcome == 'success'
         run: devbox-w -c ".github/devbox.json" run "${{ inputs.terraform_project }}-tf" -- validate
 
       - name: Plan
         id: plan
+        if: steps.validate.outcome == 'success'
         run: devbox-w -c ".github/devbox.json" run "${{ inputs.terraform_project }}-tf" -- plan -input=false "-out=${TERRAFORM_TFPLAN}"
         env:
           GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
@@ -118,7 +130,7 @@ jobs:
           state: open
 
       - name: Plan Markdown
-        if: success() && steps.findPR.outputs.number
+        if: steps.plan.outcome == 'success' && steps.findPR.outputs.number
         id: plan-md
         shell: bash
         run: |
@@ -229,7 +241,7 @@ jobs:
 
       - name: "Update PR ${{ steps.findPR.outputs.number }}"
         id: plan-pr
-        if: success() && steps.findPR.outputs.number
+        if: steps.plan-md.outcome == 'success' && steps.findPR.outputs.number
         uses: marocchino/sticky-pull-request-comment@773744901bac0e8cbb5a0dc842800d45e9b2b405 # v2
         with:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
@@ -243,12 +255,32 @@ jobs:
 
       - name: "Check Plan Results"
         id: plan-check
+        if: steps.plan.outcome != 'skipped'
         # Terminate the pipeline if the plan had failed
         run: "exit ${{ steps.plan.outputs.exit-code }}"
 
       - name: Apply
         id: apply
-        if: success() && inputs.apply_terraform
+        if: steps.plan-check.outcome == 'success' && inputs.apply_terraform
         run: devbox -c ".github/devbox.json" run "${{ inputs.terraform_project }}-tf" -- apply -input=false "${TERRAFORM_TFPLAN}"
         env:
           GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
+
+      - name: Run Specs
+        id: spec-test
+        if: inputs.run_specs && (steps.apply.outcome == 'success' || steps.apply.outcome == 'skipped')
+        run: devbox-w -c ".github/devbox.json" run "${{ inputs.terraform_project }}-spec" -- --output junit
+        continue-on-error: true
+
+      - name: Publish Spec Results
+        uses: EnricoMi/publish-unit-test-result-action@34d7c956a59aed1bfebf31df77b8de55db9bbaaf # v2.21.0
+        if: always() && steps.spec-test.outcome != 'skipped'
+        with:
+          check_run: false
+          files: |
+            report/*.xml
+
+      - name: Check Spec Results
+        id: spec-check
+        if: steps.spec-test.outcome != 'skipped'
+        run: "exit ${{ steps.spec-test.outputs.exit-code }}"
