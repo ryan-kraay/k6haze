@@ -93,7 +93,7 @@ jobs:
       fromJSON(needs.determine-changes.outputs.changes).changed_github == true ||
       fromJSON(needs.determine-changes.outputs.changes).changed_github_spec == true
     with:
-      apply_terraform: ${{ github.ref == 'refs/heads/main' }}
+      apply_terraform: "true" # secrets will always be applied, as they'll be needed further in our pipeline
       run_terraform: ${{ fromJSON(needs.determine-changes.outputs.changes).changed_github }}
       run_specs: ${{ fromJSON(needs.determine-changes.outputs.changes).changed_github_spec }}
       environment_name: curator
