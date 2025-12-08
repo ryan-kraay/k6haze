@@ -16,6 +16,7 @@ on:
 
 permissions:
   actions: write
+  checks: write
   contents: write
   issues: write
   pull-requests: write
@@ -84,25 +85,26 @@ jobs:
           echo "changes=$RESULT" >> $GITHUB_OUTPUT
 
   ##
+  ## Root Specs
+  ##
+  run-root-spec:
+    uses: ./.github/workflows/ci-pipeline.yaml
+    needs: [determine-changes, is-latest-checkout]
+    if: fromJSON(needs.determine-changes.outputs.changes).changed_root_spec == true
+
+  ##
   ## GitHub
   ##
   deploy-github:
     uses: ./.github/workflows/deploy-terraform.yaml
     needs: [determine-changes, is-latest-checkout]
-    if: fromJSON(needs.determine-changes.outputs.changes).changed_github == true
-    with:
-      apply_terraform: ${{ github.ref == 'refs/heads/main' }}
-      environment_name: curator
-      terraform_project: "github"
-    secrets: inherit # share secrets with the reusable workflow
-
-  deploy-github-test:
-    uses: ./.github/workflows/run-spec.yaml
-    needs: [determine-changes, deploy-github]
     if: |
-      always() && (needs.deploy-github.result == 'success' || needs.deploy-github.result == 'skipped') &&
+      fromJSON(needs.determine-changes.outputs.changes).changed_github == true ||
       fromJSON(needs.determine-changes.outputs.changes).changed_github_spec == true
     with:
+      apply_terraform: true # secrets will always be applied, as they'll be needed further in our pipeline
+      run_terraform: ${{ fromJSON(needs.determine-changes.outputs.changes).changed_github }}
+      run_specs: ${{ fromJSON(needs.determine-changes.outputs.changes).changed_github_spec }}
       environment_name: curator
       terraform_project: "github"
     secrets: inherit # share secrets with the reusable workflow
@@ -112,50 +114,35 @@ jobs:
   ##
   deploy-talos:
     uses: ./.github/workflows/deploy-terraform.yaml
-    needs: [determine-changes, deploy-github-test]
-    # run this unless deploy-github-test failed or was cancelled
+    needs: [determine-changes, deploy-github]
+    # run this unless deploy-github failed or was cancelled
     if: |
-      always() && (needs.deploy-github-test.result == 'success' || needs.deploy-github-test.result == 'skipped') &&
-      fromJSON(needs.determine-changes.outputs.changes).changed_talos == true
+      always() && (needs.deploy-github.result == 'success' || needs.deploy-github.result == 'skipped') &&
+      (fromJSON(needs.determine-changes.outputs.changes).changed_talos == true ||
+       fromJSON(needs.determine-changes.outputs.changes).changed_talos_spec == true)
     with:
       apply_terraform: ${{ github.ref == 'refs/heads/main' }}
+      run_terraform: ${{ fromJSON(needs.determine-changes.outputs.changes).changed_talos }}
+      run_specs: ${{ fromJSON(needs.determine-changes.outputs.changes).changed_talos_spec }}
       environment_name: development
       terraform_project: "talos"
     secrets: inherit # share secrets with the reusable workflow
 
-  deploy-talos-test:
-    uses: ./.github/workflows/run-spec.yaml
-    needs: [determine-changes, deploy-talos]
-    if: |
-      always() && (needs.deploy-talos.result == 'success' || needs.deploy-talos.result == 'skipped') &&
-      fromJSON(needs.determine-changes.outputs.changes).changed_talos_spec == true
-    with:
-      environment_name: curator
-      terraform_project: "talos"
-    secrets: inherit # share secrets with the reusable workflow
   ##
   ## Kubernetes
   ##
   deploy-k8s:
     uses: ./.github/workflows/deploy-terraform.yaml
-    needs: [determine-changes, deploy-talos-test]
-    # run this unless deploy-talos-test failed or was cancelled
+    needs: [determine-changes, deploy-talos]
+    # run this unless deploy-talos failed or was cancelled
     if: |
-      always() && (needs.deploy-talos-test.result == 'success' || needs.deploy-talos-test.result == 'skipped') &&
-      fromJSON(needs.determine-changes.outputs.changes).changed_k8s == true
+      always() && (needs.deploy-talos.result == 'success' || needs.deploy-talos.result == 'skipped') &&
+      (fromJSON(needs.determine-changes.outputs.changes).changed_k8s == true ||
+       fromJSON(needs.determine-changes.outputs.changes).changed_k8s_spec == true)
     with:
       apply_terraform: ${{ github.ref == 'refs/heads/main' }}
+      run_terraform: ${{ fromJSON(needs.determine-changes.outputs.changes).changed_k8s }}
+      run_specs: ${{ fromJSON(needs.determine-changes.outputs.changes).changed_k8s_spec }}
       environment_name: development
-      terraform_project: "k8s"
-    secrets: inherit # share secrets with the reusable workflow
-
-  deploy-k8s-test:
-    uses: ./.github/workflows/run-spec.yaml
-    needs: [determine-changes, deploy-k8s]
-    if: |
-      always() && (needs.deploy-k8s.result == 'success' || needs.deploy-k8s.result == 'skipped') &&
-      fromJSON(needs.determine-changes.outputs.changes).changed_k8s_spec == true
-    with:
-      environment_name: curator
       terraform_project: "k8s"
     secrets: inherit # share secrets with the reusable workflow

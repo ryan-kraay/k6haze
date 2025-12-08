@@ -37,7 +37,7 @@
 	//
 	// TODO:  Maybe try to create a custom Dockerfile via devbox
 	//
-	"docker run -it --rm --env HOME=/code --env PATH=/code/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin --workdir=/code --user $(id -u):$(id -g) -v $PWD:/code ubuntu:20.04 /bin/bash"
+	"docker run -it --rm --env HOME=/code --env PATH=/code/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin --workdir=/code --user $(id -u):$(id -g) -v $PWD:/code ubuntu:20.04 kiro-cli chat --agent infra-tdd"
       ],
     },
   },
