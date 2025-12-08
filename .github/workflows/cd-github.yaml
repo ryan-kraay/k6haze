@@ -16,6 +16,7 @@ on:
 
 permissions:
   actions: write
+  checks: write
   contents: write
   issues: write
   pull-requests: write
@@ -89,7 +90,7 @@ jobs:
   run-root-spec:
     uses: ./.github/workflows/ci-pipeline.yaml
     needs: [determine-changes, is-latest-checkout]
-    if: fromJSON(needs.determine-changes.outputs.changes).changed_root_spec == true
+    if: fromJSON(needs.determine-changes.outputs.changes).changed_root_spec
 
   ##
   ## GitHub
