@@ -48,7 +48,9 @@ locals {
         env_name = split("/", file_name)[1]
 
         secret_name     = k
-        plaintext_value = sensitive(v)
+        # Remove any single-quoted strings
+        #  This allows us an approximation towards .env files sourced via shell
+        plaintext_value = sensitive(trim(v, "'"))
       }
   }]...)
 
