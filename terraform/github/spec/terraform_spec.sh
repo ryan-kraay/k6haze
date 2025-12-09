@@ -1,5 +1,5 @@
 Describe "Terraform"
-  fIt "trims single-quoted values"
+  It "trims single-quoted values"
     # WARNING:  "Skip if" will only run a _single_ command.  Using && to chain them together will
     #  result in errors.  However, you can create a function call and run as many commands as you'd
     #  like.
