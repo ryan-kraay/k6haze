@@ -57,6 +57,8 @@ jobs:
       ##
       SOPS_AGE_KEY: "${{ secrets.SOPS_AGE_KEY }}"
       TF_VAR_github_owner_slug: "${{ github.repository_owner }}"
+      # specs
+      SPEC_QUOTE: "${{ secrets.SPEC_QUOTE }}"
 
       ##
       ## Talos Project
