@@ -13,7 +13,8 @@
   "shell": {
     "scripts": {
       "test": [
-        "shellspec --format documentation \"${PROJECT_ROOT}\" \"${@}\""
+        // by default shellspec will traverse and find *all* spec files
+        "shellspec -c \"${PROJECT_ROOT}/spec\" --format documentation \"${@}\""
       ],
       "github-tf": [
         "tofu -chdir=\"${PROJECT_ROOT}/terraform/github\" \"${@}\""

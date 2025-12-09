@@ -271,7 +271,7 @@ jobs:
       - name: Run Specs
         id: spec-test
         if: inputs.run_specs && (steps.apply.outcome == 'success' || steps.apply.outcome == 'skipped')
-        run: devbox-w -c ".github/devbox.json" run "${{ inputs.terraform_project }}-spec" -- --output junit
+        run: devbox-w -c ".github/devbox.json" run "${{ inputs.terraform_project }}-spec" -- --random examples --output junit
         continue-on-error: true
 
       - name: Publish Spec Results
