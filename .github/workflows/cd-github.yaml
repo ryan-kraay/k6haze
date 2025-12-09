@@ -134,10 +134,12 @@ jobs:
   ##
   deploy-k8s:
     uses: ./.github/workflows/deploy-terraform.yaml
-    needs: [determine-changes, is-latest-checkout, deploy-talos]
-    # run this unless deploy-talos failed or was cancelled
+    needs: [determine-changes, is-latest-checkout, deploy-github, deploy-talos]
+    # run this unless deploy-talos failed or was cancelled, additionally
+    #   if deploy-github failed we do NOT want to run this either.
     if: |
       always() && (needs.determine-changes.result == 'success' && needs.is-latest-checkout.result == 'success') &&
+      (needs.deploy-github.result == 'success' || needs.deploy-github.result == 'skipped') &&
       (needs.deploy-talos.result == 'success' || needs.deploy-talos.result == 'skipped') &&
       (fromJSON(needs.determine-changes.outputs.changes).changed_k8s == true ||
        fromJSON(needs.determine-changes.outputs.changes).changed_k8s_spec == true)
