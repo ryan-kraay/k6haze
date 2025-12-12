@@ -44,12 +44,13 @@ jobs:
 
 
   test:
-    uses: ./.github/workflows/deploy-terraform.yaml
+    uses: ./.github/workflows/_terraform-workflow.yaml
     needs:
-      - is-latest-checkout
       - args
     with:
       environment_name: ${{ needs.args.outputs.environment_name }}
-      apply_terraform: ${{ inputs.apply_terraform }}
       terraform_project: ${{ needs.args.outputs.project_name }}
+      apply_terraform: false
+      run_terraform: false
+      run_specs: true
     secrets: inherit # share secrets with the reusable workflow
