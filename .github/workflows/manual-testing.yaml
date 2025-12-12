@@ -1,0 +1,63 @@
+name: 🔍 Testing
+run-name: "Manual Testing: ${{github.event_name}} on ${{github.ref_name}}#${{github.run_attempt}}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      stack_name:
+        description: "The testing configuration and component to run"
+        type: choice
+        required: true
+        default: "root-spec"
+        options:
+          - curator-github
+          - development-talos
+          - production-talos
+          - root-spec
+
+permissions:
+  actions: write
+  contents: write
+  issues: write
+  pull-requests: write
+  statuses: read
+  #contents: read
+  #environments: write
+  #secrets: write
+  #variables: write
+
+jobs:
+  args:
+    name: "Parse Arguments"
+    runs-on: ubuntu-latest
+    if: inputs.stack_name != 'root-spec'
+
+    outputs:
+      project_name: ${{ steps.split.outputs.project_name }}
+      environment_name: ${{ steps.split.outputs.environment_name }}
+    steps:
+      - name: Split
+        id: split
+        shell: bash
+        run: |
+          STACK_NAME="${{ inputs.stack_name }}"
+          echo "project_name=${STACK_NAME##*-}" >> "${GITHUB_OUTPUT}"
+          echo "environment_name=${STACK_NAME%-*}" >> "${GITHUB_OUTPUT}"
+
+
+  root-test:
+    uses: ./.github/workflows/_root-specs.yaml
+    if: inputs.stack_name == 'root-spec'
+
+  project-test:
+    uses: ./.github/workflows/_terraform-workflow.yaml
+    needs:
+      - args
+    if: inputs.stack_name != 'root-spec'
+    with:
+      environment_name: ${{ needs.args.outputs.environment_name }}
+      terraform_project: ${{ needs.args.outputs.project_name }}
+      apply_terraform: false
+      run_terraform: false
+      run_specs: true
+    secrets: inherit # share secrets with the reusable workflow

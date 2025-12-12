@@ -1,5 +1,5 @@
-name: Terraform Deploy
-run-name: "Deploy Github ${{github.ref_name}} #${{github.run_attempt}}"
+name: Full CI/CD Pipeline
+run-name: "Full Pipeline: ${{github.event_name}} on ${{github.ref_name}}#${{github.run_attempt}}"
 
 on:
   push:
@@ -88,7 +88,7 @@ jobs:
   ## Root Specs
   ##
   run-root-spec:
-    uses: ./.github/workflows/ci-pipeline.yaml
+    uses: ./.github/workflows/_root-specs.yaml
     needs: [determine-changes, is-latest-checkout]
     if: fromJSON(needs.determine-changes.outputs.changes).changed_root_spec == true
 
@@ -96,7 +96,7 @@ jobs:
   ## GitHub
   ##
   deploy-github:
-    uses: ./.github/workflows/deploy-terraform.yaml
+    uses: ./.github/workflows/_terraform-workflow.yaml
     needs: [determine-changes, is-latest-checkout]
     if: |
       fromJSON(needs.determine-changes.outputs.changes).changed_github == true ||
@@ -113,7 +113,7 @@ jobs:
   ## Talos
   ##
   deploy-talos:
-    uses: ./.github/workflows/deploy-terraform.yaml
+    uses: ./.github/workflows/_terraform-workflow.yaml
     needs: [determine-changes, is-latest-checkout, deploy-github]
     # run this unless deploy-github failed or was cancelled (but we need to assert that the other deps were ran)
     if: |
@@ -133,7 +133,7 @@ jobs:
   ## Kubernetes
   ##
   deploy-k8s:
-    uses: ./.github/workflows/deploy-terraform.yaml
+    uses: ./.github/workflows/_terraform-workflow.yaml
     needs: [determine-changes, is-latest-checkout, deploy-github, deploy-talos]
     # run this unless deploy-talos failed or was cancelled, additionally
     #   if deploy-github failed we do NOT want to run this either.

@@ -1,5 +1,5 @@
-name: Continious Integration Pipeline
-run-name: "RSpec ${{github.ref_name}} #${{github.run_attempt}}"
+name: Root Specs
+run-name: "Root Tests: ${{github.event_name}} on ${{github.ref_name}}#${{github.run_attempt}}"
 
 on:
   workflow_call:
