@@ -1,5 +1,5 @@
 name: 🔍 Testing
-run-name: "Manual Testing: ${{github.event_name}} on ${{github.ref_name}}#${{github.run_attempt}}"
+run-name: "Manual Testing (${{ inputs.stack_name }}): ${{github.event_name}} on ${{github.ref_name}}#${{github.run_attempt}}"
 
 on:
   workflow_dispatch:

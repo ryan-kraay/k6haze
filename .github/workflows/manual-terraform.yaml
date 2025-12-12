@@ -1,5 +1,5 @@
 name: 🛠️ Terraform
-run-name: "Manual Terraform: ${{github.event_name}} on ${{github.ref_name}}#${{github.run_attempt}}"
+run-name: "Manual Terraform (${{ inputs.stack_name }}): ${{github.event_name}} on ${{github.ref_name}}#${{github.run_attempt}}"
 
 on:
   workflow_dispatch:
