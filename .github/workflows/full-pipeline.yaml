@@ -1,5 +1,5 @@
 name: Full CI/CD Pipeline
-run-name: "Deploy Github ${{github.ref_name}} #${{github.run_attempt}}"
+run-name: "Full Pipeline: ${{github.event_name}} on ${{github.ref_name}}#${{github.run_attempt}}"
 
 on:
   push:
@@ -95,7 +95,7 @@ jobs:
   ##
   ## GitHub
   ##
-  setup-github:
+  deploy-github:
     uses: ./.github/workflows/_terraform-workflow.yaml
     needs: [determine-changes, is-latest-checkout]
     if: |
@@ -112,13 +112,13 @@ jobs:
   ##
   ## Talos
   ##
-  setup-talos:
+  deploy-talos:
     uses: ./.github/workflows/_terraform-workflow.yaml
-    needs: [determine-changes, is-latest-checkout, setup-github]
-    # run this unless setup-github failed or was cancelled (but we need to assert that the other deps were ran)
+    needs: [determine-changes, is-latest-checkout, deploy-github]
+    # run this unless deploy-github failed or was cancelled (but we need to assert that the other deps were ran)
     if: |
       always() && (needs.determine-changes.result == 'success' && needs.is-latest-checkout.result == 'success') &&
-      (needs.setup-github.result == 'success' || needs.setup-github.result == 'skipped') &&
+      (needs.deploy-github.result == 'success' || needs.deploy-github.result == 'skipped') &&
       (fromJSON(needs.determine-changes.outputs.changes).changed_talos == true ||
        fromJSON(needs.determine-changes.outputs.changes).changed_talos_spec == true)
     with:
@@ -132,15 +132,15 @@ jobs:
   ##
   ## Kubernetes
   ##
-  setup-k8s:
+  deploy-k8s:
     uses: ./.github/workflows/_terraform-workflow.yaml
-    needs: [determine-changes, is-latest-checkout, setup-github, setup-talos]
-    # run this unless setup-talos failed or was cancelled, additionally
-    #   if setup-github failed we do NOT want to run this either.
+    needs: [determine-changes, is-latest-checkout, deploy-github, deploy-talos]
+    # run this unless deploy-talos failed or was cancelled, additionally
+    #   if deploy-github failed we do NOT want to run this either.
     if: |
       always() && (needs.determine-changes.result == 'success' && needs.is-latest-checkout.result == 'success') &&
-      (needs.setup-github.result == 'success' || needs.setup-github.result == 'skipped') &&
-      (needs.setup-talos.result == 'success' || needs.setup-talos.result == 'skipped') &&
+      (needs.deploy-github.result == 'success' || needs.deploy-github.result == 'skipped') &&
+      (needs.deploy-talos.result == 'success' || needs.deploy-talos.result == 'skipped') &&
       (fromJSON(needs.determine-changes.outputs.changes).changed_k8s == true ||
        fromJSON(needs.determine-changes.outputs.changes).changed_k8s_spec == true)
     with:
@@ -156,7 +156,7 @@ jobs:
   ##
   all-checks-passed:
     runs-on: ubuntu-latest
-    needs: [determine-changes, is-latest-checkout, run-root-spec, setup-github, setup-talos, setup-k8s]
+    needs: [determine-changes, is-latest-checkout, run-root-spec, deploy-github, deploy-talos, deploy-k8s]
     if: always()
     steps:
       - name: Check all jobs
@@ -164,14 +164,14 @@ jobs:
           if [[ "${{ needs.determine-changes.result }}" == "failure" ]] || \
              [[ "${{ needs.is-latest-checkout.result }}" == "failure" ]] || \
              [[ "${{ needs.run-root-spec.result }}" == "failure" ]] || \
-             [[ "${{ needs.setup-github.result }}" == "failure" ]] || \
-             [[ "${{ needs.setup-talos.result }}" == "failure" ]] || \
-             [[ "${{ needs.setup-k8s.result }}" == "failure" ]]; then
+             [[ "${{ needs.deploy-github.result }}" == "failure" ]] || \
+             [[ "${{ needs.deploy-talos.result }}" == "failure" ]] || \
+             [[ "${{ needs.deploy-k8s.result }}" == "failure" ]]; then
             echo "One or more jobs failed:"
             echo "  run-root-spec: ${{ needs.run-root-spec.result }}"
-            echo "  setup-github: ${{ needs.setup-github.result }}"
-            echo "  setup-talos: ${{ needs.setup-talos.result }}"
-            echo "  setup-k8s: ${{ needs.setup-k8s.result }}"
+            echo "  deploy-github: ${{ needs.deploy-github.result }}"
+            echo "  deploy-talos: ${{ needs.deploy-talos.result }}"
+            echo "  deploy-k8s: ${{ needs.deploy-k8s.result }}"
             exit 1
           fi
           echo "All jobs passed or were skipped successfully"
