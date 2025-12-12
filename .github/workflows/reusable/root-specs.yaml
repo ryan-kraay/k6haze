@@ -1,4 +1,4 @@
-name: Continious Integration Pipeline
+name: Root Specs
 run-name: "RSpec ${{github.ref_name}} #${{github.run_attempt}}"
 
 on:
