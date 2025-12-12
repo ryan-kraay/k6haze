@@ -8,11 +8,12 @@ on:
         description: "The testing configuration and component to run"
         type: choice
         required: true
-        default: "development-talos"
+        default: "root-spec"
         options:
           - curator-github
           - development-talos
           - production-talos
+          - root-spec
 
 permissions:
   actions: write
@@ -29,6 +30,7 @@ jobs:
   args:
     name: "Parse Arguments"
     runs-on: ubuntu-latest
+    if: inputs.stack_name != 'root-spec'
 
     outputs:
       project_name: ${{ steps.split.outputs.project_name }}
@@ -43,10 +45,15 @@ jobs:
           echo "environment_name=${STACK_NAME%-*}" >> "${GITHUB_OUTPUT}"
 
 
-  test:
+  root-test:
+    uses: ./.github/workflows/_root-specs.yaml
+    if: inputs.stack_name == 'root-spec'
+
+  project-test:
     uses: ./.github/workflows/_terraform-workflow.yaml
     needs:
       - args
+    if: inputs.stack_name != 'root-spec'
     with:
       environment_name: ${{ needs.args.outputs.environment_name }}
       terraform_project: ${{ needs.args.outputs.project_name }}
