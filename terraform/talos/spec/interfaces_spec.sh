@@ -21,16 +21,43 @@ Describe "Talos Network Bridge Interfaces"
     talosctl get addresses -o json | jq -rs "[.[] | select(.spec.linkName == \"$1\")]"
   }
 
+  # Get single address for interface by family, asserting 0 or 1 exists
+  #  Uses two parameters:
+  #   $1: the interface to use
+  #   $2: inet4 or inet6
+  get_address() {
+    local addresses=$(get_addresses "$1")
+    local filtered_addresses=$(echo -n "$addresses" | jq "[.[] | select(.spec.family == \"$2\")]")
+    local count=$(echo -n "$filtered_addresses" | jq 'length')
+
+    if [ "$count" -le 1 ]; then
+      echo -n "$filtered_addresses" | jq '.[0] // null'
+    else
+      echo "Expected at most 1 $2 addresses for $1, got $count" >&2
+      return 250
+    fi
+  }
+
+  get_address4() {
+    get_address "$1" "inet4"
+  }
+
+  get_address6() {
+    get_address "$1" "inet6"
+  }
+
   Describe "Helper function validation"
     Describe "get_interface function"
       It "should return null for non-existent interface"
         When call get_interface "non-existent"
+        The status should be success
         The output should equal "null"
         The output as jq '.nonexistent' should equal "null"
       End
 
       It "should return valid JSON for existing interface"
         When call get_interface "ens3"
+        The status should be success
         The output as jq '.metadata.id' should equal "ens3"
       End
     End
@@ -38,6 +65,7 @@ Describe "Talos Network Bridge Interfaces"
     Describe "get_addresses function"
       It "should return empty array for non-existent address"
         When call get_addresses "dummy1"
+        The status should be success
         The output should equal "[]"
         The output as jq '[.[] | select(.spec.family == "inet6")] | length' should equal "0"
         The output as jq '.[] | select(.spec.family == "inet6") | .spec.address' should not satisfy is_present
@@ -45,8 +73,31 @@ Describe "Talos Network Bridge Interfaces"
 
       It "should return valid JSON for existing address"
         When call get_addresses "ens3"
+        The status should be success
         The output as jq '.[] | select(.spec.family == "inet4") | .spec.linkName' should equal "ens3"
         The output as jq '.[] | select(.spec.family == "inet4") | .metadata.id' should satisfy is_present
+      End
+    End
+
+    Describe "get_address function"
+      It "should return null for non-existent interface"
+        When call get_address "dummy1" "inet4"
+        The status should be success
+        The output should equal "null"
+      End
+
+      It "should return null for non-existent family"
+        When call get_address "ens3" "inet8"
+        The status should be success
+        The output should equal "null"
+      End
+
+      It "should return valid JSON for existing address"
+        When call get_address "ens3" "inet4"
+        The status should be success
+        The output as jq '.spec.linkName' should equal "ens3"
+        The output as jq '.spec.family' should equal "inet4"
+        The output as jq '.metadata.id' should satisfy is_present
       End
     End
 
@@ -74,12 +125,14 @@ Describe "Talos Network Bridge Interfaces"
   Describe "Physical interface ens3"
     It "should exist and be up"
       When call get_interface "ens3"
+      The status should be success
       The output as jq '.metadata.id' should equal "ens3"
       The output as jq '.spec.operationalState' should equal "up"
     End
 
     It "should not have IP addresses assigned (manual mode)"
       When call get_addresses "ens3"
+      The status should be success
       The output as jq 'length' should equal "0"
     End
   End
@@ -87,12 +140,14 @@ Describe "Talos Network Bridge Interfaces"
   Describe "Bridge interface br0"
     It "should exist as a bridge"
       When call get_interface "br0"
+      The status should be success
       The output as jq '.spec.kind' should equal "bridge"
       The output as jq '.spec.operationalState' should equal "up"
     End
 
     It "should not have IP addresses assigned"
       When call get_addresses "br0"
+      The status should be success
       The output as jq 'length' should equal "0"
     End
   End
@@ -100,20 +155,22 @@ Describe "Talos Network Bridge Interfaces"
   Describe "IPv4 interface wan4"
     It "should exist and be up"
       When call get_interface "wan4"
+      The status should be success
       The output as jq '.metadata.id' should equal "wan4"
       The output as jq '.spec.operationalState' should equal "up"
     End
 
     It "should be attached to bridge br0"
       When call get_interface "wan4"
+      The status should be success
       The output as jq '.spec.masterIndex' should be present
       The output as jq '.spec.slaveKind' should equal "bridge"
     End
 
     It "should have IPv4 address configured"
-      When call get_addresses "wan4"
-      The output as jq '[.[] | select(.spec.family == "inet4")] | length' should equal "1"
-      The output as jq '.[] | select(.spec.family == "inet4") | .spec.address' should satisfy is_present
+      When call get_address4 "wan4"
+      The status should be success
+      The output as jq '.spec.address' should satisfy is_present
     End
 
     xIt "should have IPv4 default route"
@@ -125,20 +182,22 @@ Describe "Talos Network Bridge Interfaces"
   Describe "IPv6 interface wan6"
     It "should exist and be up"
       When call get_interface "wan6"
+      The status should be success
       The output as jq '.metadata.id' should equal "wan6"
       The output as jq '.spec.operationalState' should equal "up"
     End
 
     It "should be attached to bridge br0"
       When call get_interface "wan6"
+      The status should be success
       The output as jq '.spec.masterIndex' should be present
       The output as jq '.spec.slaveKind' should equal "bridge"
     End
 
     It "should have IPv6 address configured"
-      When call get_addresses "wan6"
-      The output as jq '[.[] | select(.spec.family == "inet6")] | length' should equal "1"
-      The output as jq '.[] | select(.spec.family == "inet6") | .spec.address' should satisfy is_present
+      When call get_address6 "wan6"
+      The status should be success
+      The output as jq '.spec.address' should satisfy is_present
     End
 
     xIt "should have IPv6 default route"
@@ -150,6 +209,7 @@ Describe "Talos Network Bridge Interfaces"
   Describe "Network topology validation"
     It "should have ens3 as bridge member"
       When call get_interface "ens3"
+      The status should be success
       The output as jq '.spec.masterIndex' should be present
       The output as jq '.spec.slaveKind' should equal "bridge"
     End
