@@ -135,6 +135,13 @@ Describe "Talos Network Bridge Interfaces"
       The status should be success
       The output as jq 'length' should equal "0"
     End
+
+    It "should have ens3 as bridge member"
+      When call get_interface "ens3"
+      The status should be success
+      The output as jq '.spec.masterIndex' should be present
+      The output as jq '.spec.slaveKind' should equal "bridge"
+    End
   End
 
   Describe "Bridge interface br0"
@@ -203,15 +210,6 @@ Describe "Talos Network Bridge Interfaces"
     xIt "should have IPv6 default route"
       When call talosctl get routes -o json
       The output as jq '[.[] | select(.spec.destination == "::/0")] | length' should be greater than "0"
-    End
-  End
-
-  Describe "Network topology validation"
-    It "should have ens3 as bridge member"
-      When call get_interface "ens3"
-      The status should be success
-      The output as jq '.spec.masterIndex' should be present
-      The output as jq '.spec.slaveKind' should equal "bridge"
     End
   End
 End
