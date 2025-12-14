@@ -6,7 +6,16 @@
   },
   "shell": {
     "init_hook": [
-      "echo 'Welcome to devbox!' > /dev/null"
+      "echo 'Welcome to devbox!' > /dev/null",
+      "if [ -z \"${TALOSCONFIG}\" ]; then",
+      "  if [ -n \"${TALOSCONFIG_TEXT}\" ]; then",
+      "    export TALOSCONFIG=/tmp/talosconfig",
+      "    echo -n \"${TALOSCONFIG_TEXT}\" > \"${TALOSCONFIG}\"",
+      "    echo \"Using TALOSCONFIG_TEXT to create ${TALOSCONFIG}\"",
+      "  else",
+      "    echo \"TALOSCONFIG not found and TALOSCONFIG_TEXT not defined\"",
+      "  fi",
+      "fi"
     ]
   },
   "include": [ "path:../devbox-plugins/common/plugin.json" ]

@@ -9,6 +9,7 @@ variable "terraform_statefile_bucket" {
 variable "export_configs" {
   description = "Create the talosconfig and kubeconfig files"
   default     = false
+  type        = bool
 }
 
 variable "talos_version" {

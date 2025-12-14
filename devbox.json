@@ -14,7 +14,7 @@
     "init_hook": [
       // We will only set SOPS_AGE_KEY_FILE *IF* SOPS_AGE_KEY is not defined (which it is in our github action)
       "test -z \"${SOPS_AGE_KEY}\" && export SOPS_AGE_KEY_FILE=${SOPS_AGE_KEY_FILE:-$PWD/terraform/github/secrets/secret.key}",
-      "export TALOSCONFIG=${TALOSCONFIG:-$PWD/terraform/github/secrets/development-k8s/talosconfig}",
+      "export TALOSCONFIG=${TALOSCONFIG:-$PWD/terraform/github/secrets/development-talos/TALOSCONFIG_TEXT.raw}",
       "export KUBECONFIG=${KUBECONFIG:-$PWD/terraform/github/secrets/development-k8s/kubeconfig}",
       "echo 'Welcome to devbox!' > /dev/null",
     ],

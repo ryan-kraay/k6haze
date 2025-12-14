@@ -10,7 +10,7 @@ resource "local_file" "talosconfig" {
   count = var.export_configs == true ? 1 : 0
 
   content         = data.talos_client_configuration.this.talos_config
-  filename        = "${path.root}/../github/secrets/development-k8s/talosconfig"
+  filename        = "${path.root}/../github/secrets/development-talos/TALOSCONFIG_TEXT.raw"
   file_permission = "0600"
 }
 
