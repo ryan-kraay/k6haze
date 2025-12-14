@@ -4,9 +4,7 @@
     "age@1.2.1",
     "cosign@3.0.2",
     "gitsign@0.13.0",
-    "kubectl@1.34.2",
     "sops@3.11.0",
-    "talosctl@1.11.5",
   ],
   "env": {
     // avoid the need to choose our oauth when using sigstore
@@ -29,15 +27,15 @@
         "docker run -it --rm -v $PWD:/repo -w /repo -e GITHUB_COM_TOKEN=${GITHUB_COM_TOKEN:-} -e LOG_LEVEL=debug renovate/renovate:latest --platform=local --repository-cache=reset \"${@}\"",
       ],
       "kiro-cli": [
-	// installation was clunky:
-	//   I launched a docker image, ran `apt install curl ca-certificates unzip --no-install-recommends` then copied $HOME/.local/bin /code/.local/bin
-	//
-	// authentication was clunky (a browser is needed), so I just ran
-	// devbox shell && export HOME=$(pwd) && firefox & && ./.local/bin/kiro-cli login
-	//
-	// TODO:  Maybe try to create a custom Dockerfile via devbox
-	//
-	"docker run -it --rm --env HOME=/code --env PATH=/code/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin --workdir=/code --user $(id -u):$(id -g) -v $PWD:/code ubuntu:20.04 kiro-cli chat --agent infra-tdd"
+        // installation was clunky:
+        //   I launched a docker image, ran `apt install curl ca-certificates unzip --no-install-recommends` then copied $HOME/.local/bin /code/.local/bin
+        //
+        // authentication was clunky (a browser is needed), so I just ran
+        // devbox shell && export HOME=$(pwd) && firefox & && ./.local/bin/kiro-cli login
+        //
+        // TODO:  Maybe try to create a custom Dockerfile via devbox
+        //
+        "docker run -it --rm --env HOME=/code --env PATH=/code/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin --workdir=/code --user $(id -u):$(id -g) -v $PWD:/code ubuntu:20.04 kiro-cli chat --agent infra-tdd",
       ],
     },
   },
