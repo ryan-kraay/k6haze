@@ -23,10 +23,16 @@ variable "cluster_name" {
 variable "master_node" {
   description = "Describe the master node"
   type = object({
-    hostname    = string
-    fqdn        = string
-    ipaddresses = list(string)
-    gateway     = string
+    hostname = string
+    fqdn     = string
+    interfaces = list(object({
+      interface = string
+      addresses = list(string)
+      routes = list(object({
+        network = string
+        gateway = string
+      }))
+    }))
   })
   sensitive = true
 }
