@@ -13,6 +13,24 @@ data "talos_machine_configuration" "this" {
   cluster_endpoint = "https://${var.master_node.fqdn}:6443"
   machine_secrets  = talos_machine_secrets.this.machine_secrets
   talos_version    = local.talos_version
+
+  config_patches = [
+    yamlencode({
+      cluster = {
+        network = {
+          cni = {
+            # allows us to install cilium
+            name = "none"
+          }
+        }
+        proxy = {
+          # use the cilium replacement for kube-proxy
+          # https://docs.siderolabs.com/kubernetes-guides/cni/deploying-cilium
+          disabled = true
+        }
+      }
+    })
+  ]
 }
 
 resource "talos_machine_configuration_apply" "this" {
@@ -32,18 +50,10 @@ resource "talos_machine_configuration_apply" "this" {
           wipe  = true
         },
         network = {
-          hostname = var.master_node.hostname
-          interfaces = [
-            {
-              interface = "ens3"
-              addresses = var.master_node.ipaddresses
-              routes = [{
-                network = "0.0.0.0/0"
-                gateway = var.master_node.gateway
-              }]
-            }
-          ]
-        },
+          hostname    = var.master_node.hostname
+          interfaces  = var.master_node.interfaces
+          nameservers = ["2606:4700:4700::1111", "2606:4700:4700::1001", "1.1.1.1", "8.8.8.8"]
+        }
         # exposes the talos endpoint
         certSANs = [var.master_node.fqdn]
       }

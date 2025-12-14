@@ -1,0 +1,161 @@
+Describe "Talos Network Bridge Interfaces"
+  Include "spec/support/modifiers/jq.sh"
+
+  # Wrapper for talosctl that suppresses non-critical warnings while preserving other stderr
+  talosctl() {
+    command talosctl "$@" 2> >(grep -v "server version.*is older than client version" >&2)
+  }
+
+  # Check if value is present (not null, empty string, empty list, empty map)
+  is_present() {
+    [ "${is_present:-}" != "null" ] && [ "${is_present:-}" != "" ] && [ "${is_present:-}" != "[]" ] && [ "${is_present:-}" != "{}" ]
+  }
+
+  # Get interface data by interface name
+  get_interface() {
+    talosctl get links -o json | jq -rs "(.[] | select(.metadata.id == \"$1\")) // \"null\""
+  }
+
+  # Get all address data by interface name or an empty array
+  get_addresses() {
+    talosctl get addresses -o json | jq -rs "[.[] | select(.spec.linkName == \"$1\")]"
+  }
+
+  # Get single address for interface by family, asserting 0 or 1 exists
+  #  Uses two parameters:
+  #   $1: the interface to use
+  #   $2: inet4 or inet6
+  get_address() {
+    local addresses=$(get_addresses "$1")
+    local filtered_addresses=$(echo -n "$addresses" | jq "[.[] | select(.spec.family == \"$2\")]")
+    local count=$(echo -n "$filtered_addresses" | jq 'length')
+
+    if [ "$count" -le 1 ]; then
+      echo -n "$filtered_addresses" | jq '.[0] // null'
+    else
+      echo "Expected at most 1 $2 addresses for $1, got $count" >&2
+      return 250
+    fi
+  }
+
+  get_address4() {
+    get_address "$1" "inet4"
+  }
+
+  get_address6() {
+    get_address "$1" "inet6"
+  }
+
+  Describe "Helper function validation"
+    Describe "get_interface function"
+      It "should return null for non-existent interface"
+        When call get_interface "non-existent"
+        The status should be success
+        The output should equal "null"
+        The output as jq '.nonexistent' should equal "null"
+      End
+
+      It "should return valid JSON for existing interface"
+        When call get_interface "ens3"
+        The status should be success
+        The output as jq '.metadata.id' should equal "ens3"
+      End
+    End
+
+    Describe "get_addresses function"
+      It "should return empty array for non-existent address"
+        When call get_addresses "dummy1"
+        The status should be success
+        The output should equal "[]"
+        The output as jq '[.[] | select(.spec.family == "inet6")] | length' should equal "0"
+        The output as jq '.[] | select(.spec.family == "inet6") | .spec.address' should not satisfy is_present
+      End
+
+      It "should return valid JSON for existing address"
+        When call get_addresses "ens3"
+        The status should be success
+        The output as jq '.[] | select(.spec.family == "inet4") | .spec.linkName' should equal "ens3"
+        The output as jq '.[] | select(.spec.family == "inet4") | .metadata.id' should satisfy is_present
+      End
+    End
+
+    Describe "get_address function"
+      It "should return null for non-existent interface"
+        When call get_address "dummy1" "inet4"
+        The status should be success
+        The output should equal "null"
+      End
+
+      It "should return null for non-existent family"
+        When call get_address "ens3" "inet8"
+        The status should be success
+        The output should equal "null"
+      End
+
+      It "should return valid JSON for existing address"
+        When call get_address "ens3" "inet4"
+        The status should be success
+        The output as jq '.spec.linkName' should equal "ens3"
+        The output as jq '.spec.family' should equal "inet4"
+        The output as jq '.metadata.id' should satisfy is_present
+      End
+    End
+
+    Describe "is_present function"
+      Parameters
+        "null" false
+        "" false
+        "[]" false
+        "{}" false
+        "valid-value" true
+        '["item"]' true
+      End
+
+      Example "should validate $1 as $2"
+        When call echo "$1"
+        if [ "$2" = "true" ]; then
+          The output should satisfy is_present
+        else
+          The output should not satisfy is_present
+        fi
+      End
+    End
+  End
+
+  Describe "Physical interface ens3"
+    It "should exist and be up"
+      When call get_interface "ens3"
+      The status should be success
+      The output as jq '.metadata.id' should equal "ens3"
+      The output as jq '.spec.operationalState' should equal "up"
+    End
+
+    It "should have IPv4 address configured"
+      When call get_address4 "ens3"
+      The status should be success
+      The output as jq '.spec.address' should satisfy is_present
+    End
+    xIt "should have IPv4 default route"
+      When call talosctl get routes -o json
+      The output as jq '[.[] | select(.spec.destination == "0.0.0.0/0")] | length' should be greater than "0"
+    End
+
+    It "should have IPv6 address configured"
+      # get_addresses returns both ipv4 and ipv6 addresses (for that interface)
+      When call get_addresses "ens3"
+      The status should be success
+      # With IPv6 we actually have two addresses to manage
+      #  1: Our routable ip-address
+      #  2: The Discovery Network Protocol "broadcast" magic (ie: fe80::)
+      The output as jq '[.[] | select(.spec.family == "inet6")] | length' should equal 2
+      # Our NDP
+      The output as jq '.[] | select(.spec.family == "inet6" and (.spec.address | startswith("fe80::"))) | .spec.address' should satisfy is_present
+      # Our publically accessable address
+      The output as jq '.[] | select(.spec.family == "inet6" and (.spec.address | startswith("fe80::") | not)) | .spec.address' should satisfy is_present
+    End
+    xIt "should have IPv6 default route"
+      When call talosctl get routes -o json
+      The output as jq '[.[] | select(.spec.destination == "::/0")] | length' should be greater than "0"
+    End
+  End
+End

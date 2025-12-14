@@ -9,6 +9,7 @@ variable "terraform_statefile_bucket" {
 variable "export_configs" {
   description = "Create the talosconfig and kubeconfig files"
   default     = false
+  type        = bool
 }
 
 variable "talos_version" {
@@ -23,10 +24,16 @@ variable "cluster_name" {
 variable "master_node" {
   description = "Describe the master node"
   type = object({
-    hostname    = string
-    fqdn        = string
-    ipaddresses = list(string)
-    gateway     = string
+    hostname = string
+    fqdn     = string
+    interfaces = list(object({
+      interface = string
+      addresses = list(string)
+      routes = list(object({
+        network = string
+        gateway = string
+      }))
+    }))
   })
   sensitive = true
 }
