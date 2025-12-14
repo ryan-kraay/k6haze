@@ -52,6 +52,7 @@ resource "talos_machine_configuration_apply" "this" {
         network = {
           hostname   = var.master_node.hostname
           interfaces = var.master_node.interfaces
+          nameservers = ["2606:4700:4700::1111", "2606:4700:4700::1001", "1.1.1.1", "8.8.8.8"]
         }
         # exposes the talos endpoint
         certSANs = [var.master_node.fqdn]
