@@ -130,83 +130,29 @@ Describe "Talos Network Bridge Interfaces"
       The output as jq '.spec.operationalState' should equal "up"
     End
 
-    It "should not have IP addresses assigned (manual mode)"
-      When call get_addresses "ens3"
-      The status should be success
-      The output as jq 'length' should equal "0"
-    End
-
-    It "should have ens3 as bridge member"
-      When call get_interface "ens3"
-      The status should be success
-      The output as jq '.spec.masterIndex' should be present
-      The output as jq '.spec.slaveKind' should equal "bridge"
-    End
-  End
-
-  Describe "Bridge interface br0"
-    It "should exist as a bridge"
-      When call get_interface "br0"
-      The status should be success
-      The output as jq '.spec.kind' should equal "bridge"
-      The output as jq '.spec.operationalState' should equal "up"
-    End
-
-    It "should not have IP addresses assigned"
-      When call get_addresses "br0"
-      The status should be success
-      The output as jq 'length' should equal "0"
-    End
-  End
-
-  Describe "IPv4 interface wan4"
-    It "should exist and be up"
-      When call get_interface "wan4"
-      The status should be success
-      The output as jq '.metadata.id' should equal "wan4"
-      The output as jq '.spec.operationalState' should equal "up"
-    End
-
-    It "should be attached to bridge br0"
-      When call get_interface "wan4"
-      The status should be success
-      The output as jq '.spec.masterIndex' should be present
-      The output as jq '.spec.slaveKind' should equal "bridge"
-    End
-
     It "should have IPv4 address configured"
-      When call get_address4 "wan4"
+      When call get_address4 "ens3"
       The status should be success
       The output as jq '.spec.address' should satisfy is_present
     End
-
     xIt "should have IPv4 default route"
       When call talosctl get routes -o json
       The output as jq '[.[] | select(.spec.destination == "0.0.0.0/0")] | length' should be greater than "0"
     End
-  End
-
-  Describe "IPv6 interface wan6"
-    It "should exist and be up"
-      When call get_interface "wan6"
-      The status should be success
-      The output as jq '.metadata.id' should equal "wan6"
-      The output as jq '.spec.operationalState' should equal "up"
-    End
-
-    It "should be attached to bridge br0"
-      When call get_interface "wan6"
-      The status should be success
-      The output as jq '.spec.masterIndex' should be present
-      The output as jq '.spec.slaveKind' should equal "bridge"
-    End
 
     It "should have IPv6 address configured"
-      When call get_address6 "wan6"
+      # get_addresses returns both ipv4 and ipv6 addresses (for that interface)
+      When call get_addresses "ens3"
       The status should be success
-      The output as jq '.spec.address' should satisfy is_present
+      # With IPv6 we actually have two addresses to manage
+      #  1: Our routable ip-address
+      #  2: The Discovery Network Protocol "broadcast" magic (ie: fe80::)
+      The output as jq '[.[] | select(.spec.family == "inet6")] | length' should equal 2
+      # Our NDP
+      The output as jq '.[] | select(.spec.family == "inet6" and (.spec.address | startswith("fe80::"))) | .spec.address' should satisfy is_present
+      # Our publically accessable address
+      The output as jq '.[] | select(.spec.family == "inet6" and (.spec.address | startswith("fe80::") | not)) | .spec.address' should satisfy is_present
     End
-
     xIt "should have IPv6 default route"
       When call talosctl get routes -o json
       The output as jq '[.[] | select(.spec.destination == "::/0")] | length' should be greater than "0"
