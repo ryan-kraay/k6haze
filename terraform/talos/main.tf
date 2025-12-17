@@ -22,6 +22,8 @@ data "talos_machine_configuration" "this" {
             # allows us to install cilium
             name = "none"
           }
+          podCIDRs = [ "...the ip range for our pods across all nodes???... "]
+          serviceCIDRs = [ "... the ip range for our services across all nodes??? "]
         }
         proxy = {
           # use the cilium replacement for kube-proxy

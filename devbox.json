@@ -16,6 +16,9 @@
       "test -z \"${SOPS_AGE_KEY}\" && export SOPS_AGE_KEY_FILE=${SOPS_AGE_KEY_FILE:-$PWD/terraform/github/secrets/secret.key}",
       "export TALOSCONFIG=${TALOSCONFIG:-$PWD/terraform/github/secrets/development-talos/TALOSCONFIG_TEXT.raw}",
       "export KUBECONFIG=${KUBECONFIG:-$PWD/terraform/github/secrets/development-k8s/kubeconfig}",
+      // the hashicorp/helm provider uses KUBE_CONFIG_PATH instead of the (established) KUBECONFIG env var
+      //  This logic cannot be consolidated into the plugin, as the plugin's init_hook is evaluated _before_ this one is
+      "export KUBE_CONFIG_PATH=\"${KUBECONFIG}\"",
       "echo 'Welcome to devbox!' > /dev/null",
     ],
     "scripts": {

@@ -16,12 +16,12 @@ terraform {
     endpoints                   = { s3 = "https://${var.cloudflare_account_id}.r2.cloudflarestorage.com" }
   }
   required_providers {
-    kubernetes = {
-      source  = "hashicorp/kubernetes"
-      version = "3.0.1"
+    helm = {
+      source = "hashicorp/helm"
+      version = "3.1.1"
     }
   }
 }
 
-provider "kubernetes" {
+provider "helm" {
 }
