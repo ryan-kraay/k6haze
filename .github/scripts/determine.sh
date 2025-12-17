@@ -73,9 +73,9 @@ determine_changes() {
   done
 
   info "Final changes: ${!changes[*]}"
-  info "DEBUG:[${props}]"
   # Convert props format to JSON, converting string booleans to actual booleans
-  echo -n "$props" | yq -p props -o json 'with_entries(.value |= (. == "true"))'
+  # This needs to be stored as a SINGLE line of JSON (otherwise, we cannot use it as a github secret)
+  echo -n "$props" | yq -p props -o json -I 0 'with_entries(.value |= (. == "true"))'
 }
 
 if [ -z "${SHELLSPEC_ROOT}" ]; then
