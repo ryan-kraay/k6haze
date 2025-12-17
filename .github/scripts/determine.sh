@@ -73,6 +73,7 @@ determine_changes() {
   done
 
   info "Final changes: ${!changes[*]}"
+  info "DEBUG:[${props}]"
   # Convert props format to JSON, converting string booleans to actual booleans
   echo -n "$props" | yq -p props -o json 'with_entries(.value |= (. == "true"))'
 }
