@@ -66,13 +66,15 @@ determine_changes() {
     changes["changed_k8s_spec"]=true
   fi
 
-  # Render the results as json
-  local args=()
+  # Convert the bash associative array to a simple properties format that yq will convert into json
+  local props=""
   for key in "${!changes[@]}"; do
-    args+=(--argjson "$key" "${changes[$key]}")
+    props+="$key=${changes[$key]}"$'\n'
   done
+
   info "Final changes: ${!changes[*]}"
-  jq -cn '$ARGS.named' "${args[@]}"
+  # Convert props format to JSON, converting string booleans to actual booleans
+  echo -n "$props" | yq -p props -o json 'with_entries(.value |= (. == "true"))'
 }
 
 if [ -z "${SHELLSPEC_ROOT}" ]; then
