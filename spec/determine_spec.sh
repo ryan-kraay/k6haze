@@ -8,13 +8,13 @@ Describe "determine"
     End
     It "returns all false"
       When call determine_changes
-      The output as jq ".changed_root_spec" should equal "false"
-      The output as jq ".changed_github" should equal "false"
-      The output as jq ".changed_github_spec" should equal "false"
-      The output as jq ".changed_talos" should equal "false"
-      The output as jq ".changed_talos_spec" should equal "false"
-      The output as jq ".changed_k8s" should equal "false"
-      The output as jq ".changed_k8s_spec" should equal "false"
+      The output as yq ".changed_root_spec" should equal "false"
+      The output as yq ".changed_github" should equal "false"
+      The output as yq ".changed_github_spec" should equal "false"
+      The output as yq ".changed_talos" should equal "false"
+      The output as yq ".changed_talos_spec" should equal "false"
+      The output as yq ".changed_k8s" should equal "false"
+      The output as yq ".changed_k8s_spec" should equal "false"
     End
   End
 
@@ -30,9 +30,9 @@ Describe "determine"
         #|terraform/${1}/main.tf
       End
       When call determine_changes
-      The output as jq ".changed_${1}" should equal "true"
+      The output as yq ".changed_${1}" should equal "true"
       # Changes to our terraform code will trigger the spec to rerun
-      The output as jq ".changed_${1}_spec" should equal "true"
+      The output as yq ".changed_${1}_spec" should equal "true"
     End
 
     Example "on ${1} spec"
@@ -40,9 +40,9 @@ Describe "determine"
         #|terraform/${1}/spec/something_spec.sh
       End
       When call determine_changes
-      The output as jq ".changed_${1}_spec" should equal "true"
+      The output as yq ".changed_${1}_spec" should equal "true"
       # Changes to the spec will _not_ trigger terraform to rerun
-      The output as jq ".changed_${1}" should equal "false"
+      The output as yq ".changed_${1}" should equal "false"
     End
   End
 
@@ -52,13 +52,13 @@ Describe "determine"
     End
     It "sets only changed_root_spec"
       When call determine_changes
-      The output as jq ".changed_root_spec" should equal "true"
-      The output as jq ".changed_github" should equal "false"
-      The output as jq ".changed_github_spec" should equal "false"
-      The output as jq ".changed_talos" should equal "false"
-      The output as jq ".changed_talos_spec" should equal "false"
-      The output as jq ".changed_k8s" should equal "false"
-      The output as jq ".changed_k8s_spec" should equal "false"
+      The output as yq ".changed_root_spec" should equal "true"
+      The output as yq ".changed_github" should equal "false"
+      The output as yq ".changed_github_spec" should equal "false"
+      The output as yq ".changed_talos" should equal "false"
+      The output as yq ".changed_talos_spec" should equal "false"
+      The output as yq ".changed_k8s" should equal "false"
+      The output as yq ".changed_k8s_spec" should equal "false"
     End
   End
 
@@ -68,13 +68,13 @@ Describe "determine"
     End
     It "sets flags for talos and k8s"
       When call determine_changes
-      The output as jq ".changed_root_spec" should equal "false"
-      The output as jq ".changed_github" should equal "true"
-      The output as jq ".changed_github_spec" should equal "true"
-      The output as jq ".changed_talos" should equal "true"
-      The output as jq ".changed_talos_spec" should equal "true"
-      The output as jq ".changed_k8s" should equal "true"
-      The output as jq ".changed_k8s_spec" should equal "true"
+      The output as yq ".changed_root_spec" should equal "false"
+      The output as yq ".changed_github" should equal "true"
+      The output as yq ".changed_github_spec" should equal "true"
+      The output as yq ".changed_talos" should equal "true"
+      The output as yq ".changed_talos_spec" should equal "true"
+      The output as yq ".changed_k8s" should equal "true"
+      The output as yq ".changed_k8s_spec" should equal "true"
     End
   End
 
@@ -84,13 +84,13 @@ Describe "determine"
     End
     It "sets flags for k8s"
       When call determine_changes
-      The output as jq ".changed_root_spec" should equal "false"
-      The output as jq ".changed_github" should equal "false"
-      The output as jq ".changed_github_spec" should equal "false"
-      The output as jq ".changed_talos" should equal "true"
-      The output as jq ".changed_talos_spec" should equal "true"
-      The output as jq ".changed_k8s" should equal "true"
-      The output as jq ".changed_k8s_spec" should equal "true"
+      The output as yq ".changed_root_spec" should equal "false"
+      The output as yq ".changed_github" should equal "false"
+      The output as yq ".changed_github_spec" should equal "false"
+      The output as yq ".changed_talos" should equal "true"
+      The output as yq ".changed_talos_spec" should equal "true"
+      The output as yq ".changed_k8s" should equal "true"
+      The output as yq ".changed_k8s_spec" should equal "true"
     End
   End
 
@@ -100,13 +100,13 @@ Describe "determine"
     End
     It "sets no additional flags"
       When call determine_changes
-      The output as jq ".changed_root_spec" should equal "false"
-      The output as jq ".changed_github" should equal "false"
-      The output as jq ".changed_github_spec" should equal "false"
-      The output as jq ".changed_talos" should equal "false"
-      The output as jq ".changed_talos_spec" should equal "false"
-      The output as jq ".changed_k8s" should equal "true"
-      The output as jq ".changed_k8s_spec" should equal "true"
+      The output as yq ".changed_root_spec" should equal "false"
+      The output as yq ".changed_github" should equal "false"
+      The output as yq ".changed_github_spec" should equal "false"
+      The output as yq ".changed_talos" should equal "false"
+      The output as yq ".changed_talos_spec" should equal "false"
+      The output as yq ".changed_k8s" should equal "true"
+      The output as yq ".changed_k8s_spec" should equal "true"
     End
   End
 
@@ -118,13 +118,13 @@ Describe "determine"
     End
     It "sets no changes"
       When call determine_changes
-      The output as jq ".changed_root_spec" should equal "false"
-      The output as jq ".changed_github" should equal "false"
-      The output as jq ".changed_github_spec" should equal "false"
-      The output as jq ".changed_talos" should equal "false"
-      The output as jq ".changed_talos_spec" should equal "false"
-      The output as jq ".changed_k8s" should equal "false"
-      The output as jq ".changed_k8s_spec" should equal "false"
+      The output as yq ".changed_root_spec" should equal "false"
+      The output as yq ".changed_github" should equal "false"
+      The output as yq ".changed_github_spec" should equal "false"
+      The output as yq ".changed_talos" should equal "false"
+      The output as yq ".changed_talos_spec" should equal "false"
+      The output as yq ".changed_k8s" should equal "false"
+      The output as yq ".changed_k8s_spec" should equal "false"
     End
   End
 
@@ -134,13 +134,13 @@ Describe "determine"
     End
     It "sets all changes"
       When call determine_changes
-      The output as jq ".changed_root_spec" should equal "true"
-      The output as jq ".changed_github" should equal "true"
-      The output as jq ".changed_github_spec" should equal "true"
-      The output as jq ".changed_talos" should equal "true"
-      The output as jq ".changed_talos_spec" should equal "true"
-      The output as jq ".changed_k8s" should equal "true"
-      The output as jq ".changed_k8s_spec" should equal "true"
+      The output as yq ".changed_root_spec" should equal "true"
+      The output as yq ".changed_github" should equal "true"
+      The output as yq ".changed_github_spec" should equal "true"
+      The output as yq ".changed_talos" should equal "true"
+      The output as yq ".changed_talos_spec" should equal "true"
+      The output as yq ".changed_k8s" should equal "true"
+      The output as yq ".changed_k8s_spec" should equal "true"
     End
   End
 

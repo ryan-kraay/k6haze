@@ -1,5 +1,5 @@
 Describe "Talos Network Bridge Interfaces"
-  Include "spec/support/modifiers/jq.sh"
+  Include "spec/support/modifiers/yq.sh"
 
   # Wrapper for talosctl that suppresses non-critical warnings while preserving other stderr
   talosctl() {
@@ -52,13 +52,13 @@ Describe "Talos Network Bridge Interfaces"
         When call get_interface "non-existent"
         The status should be success
         The output should equal "null"
-        The output as jq '.nonexistent' should equal "null"
+        The output as yq '.nonexistent' should equal "null"
       End
 
       It "should return valid JSON for existing interface"
         When call get_interface "ens3"
         The status should be success
-        The output as jq '.metadata.id' should equal "ens3"
+        The output as yq '.metadata.id' should equal "ens3"
       End
     End
 
@@ -67,15 +67,15 @@ Describe "Talos Network Bridge Interfaces"
         When call get_addresses "dummy1"
         The status should be success
         The output should equal "[]"
-        The output as jq '[.[] | select(.spec.family == "inet6")] | length' should equal "0"
-        The output as jq '.[] | select(.spec.family == "inet6") | .spec.address' should not satisfy is_present
+        The output as yq '[.[] | select(.spec.family == "inet6")] | length' should equal "0"
+        The output as yq '.[] | select(.spec.family == "inet6") | .spec.address' should not satisfy is_present
       End
 
       It "should return valid JSON for existing address"
         When call get_addresses "ens3"
         The status should be success
-        The output as jq '.[] | select(.spec.family == "inet4") | .spec.linkName' should equal "ens3"
-        The output as jq '.[] | select(.spec.family == "inet4") | .metadata.id' should satisfy is_present
+        The output as yq '.[] | select(.spec.family == "inet4") | .spec.linkName' should equal "ens3"
+        The output as yq '.[] | select(.spec.family == "inet4") | .metadata.id' should satisfy is_present
       End
     End
 
@@ -95,9 +95,9 @@ Describe "Talos Network Bridge Interfaces"
       It "should return valid JSON for existing address"
         When call get_address "ens3" "inet4"
         The status should be success
-        The output as jq '.spec.linkName' should equal "ens3"
-        The output as jq '.spec.family' should equal "inet4"
-        The output as jq '.metadata.id' should satisfy is_present
+        The output as yq '.spec.linkName' should equal "ens3"
+        The output as yq '.spec.family' should equal "inet4"
+        The output as yq '.metadata.id' should satisfy is_present
       End
     End
 
@@ -126,18 +126,18 @@ Describe "Talos Network Bridge Interfaces"
     It "should exist and be up"
       When call get_interface "ens3"
       The status should be success
-      The output as jq '.metadata.id' should equal "ens3"
-      The output as jq '.spec.operationalState' should equal "up"
+      The output as yq '.metadata.id' should equal "ens3"
+      The output as yq '.spec.operationalState' should equal "up"
     End
 
     It "should have IPv4 address configured"
       When call get_address4 "ens3"
       The status should be success
-      The output as jq '.spec.address' should satisfy is_present
+      The output as yq '.spec.address' should satisfy is_present
     End
     xIt "should have IPv4 default route"
       When call talosctl get routes -o json
-      The output as jq '[.[] | select(.spec.destination == "0.0.0.0/0")] | length' should be greater than "0"
+      The output as yq '[.[] | select(.spec.destination == "0.0.0.0/0")] | length' should be greater than "0"
     End
 
     It "should have IPv6 address configured"
@@ -147,15 +147,15 @@ Describe "Talos Network Bridge Interfaces"
       # With IPv6 we actually have two addresses to manage
       #  1: Our routable ip-address
       #  2: The Discovery Network Protocol "broadcast" magic (ie: fe80::)
-      The output as jq '[.[] | select(.spec.family == "inet6")] | length' should equal 2
+      The output as yq '[.[] | select(.spec.family == "inet6")] | length' should equal 2
       # Our NDP
-      The output as jq '.[] | select(.spec.family == "inet6" and (.spec.address | test("^fe80::"))) | .spec.address' should satisfy is_present
+      The output as yq '.[] | select(.spec.family == "inet6" and (.spec.address | test("^fe80::"))) | .spec.address' should satisfy is_present
       # Our publically accessable address
-      The output as jq '.[] | select(.spec.family == "inet6" and (.spec.address | test("^fe80::") | not)) | .spec.address' should satisfy is_present
+      The output as yq '.[] | select(.spec.family == "inet6" and (.spec.address | test("^fe80::") | not)) | .spec.address' should satisfy is_present
     End
     xIt "should have IPv6 default route"
       When call talosctl get routes -o json
-      The output as jq '[.[] | select(.spec.destination == "::/0")] | length' should be greater than "0"
+      The output as yq '[.[] | select(.spec.destination == "::/0")] | length' should be greater than "0"
     End
   End
 End
