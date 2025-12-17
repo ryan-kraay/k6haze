@@ -13,12 +13,12 @@ Describe "Talos Network Bridge Interfaces"
 
   # Get interface data by interface name
   get_interface() {
-    talosctl get links -o json | jq -rs "(.[] | select(.metadata.id == \"$1\")) // \"null\""
+    talosctl get links -o json | yq eval-all -p json -o json "[.] | (.[] | select(.metadata.id == \"$1\")) // null"
   }
 
   # Get all address data by interface name or an empty array
   get_addresses() {
-    talosctl get addresses -o json | jq -rs "[.[] | select(.spec.linkName == \"$1\")]"
+    talosctl get addresses -o json | yq eval-all -p json -o json "[.] | [.[] | select(.spec.linkName == \"$1\")]"
   }
 
   # Get single address for interface by family, asserting 0 or 1 exists
@@ -27,11 +27,11 @@ Describe "Talos Network Bridge Interfaces"
   #   $2: inet4 or inet6
   get_address() {
     local addresses=$(get_addresses "$1")
-    local filtered_addresses=$(echo -n "$addresses" | jq "[.[] | select(.spec.family == \"$2\")]")
-    local count=$(echo -n "$filtered_addresses" | jq 'length')
+    local filtered_addresses=$(echo -n "$addresses" | yq "[.[] | select(.spec.family == \"$2\")]")
+    local count=$(echo -n "$filtered_addresses" | yq 'length')
 
     if [ "$count" -le 1 ]; then
-      echo -n "$filtered_addresses" | jq '.[0] // null'
+      echo -n "$filtered_addresses" | yq '.[0] // null'
     else
       echo "Expected at most 1 $2 addresses for $1, got $count" >&2
       return 250
@@ -149,9 +149,9 @@ Describe "Talos Network Bridge Interfaces"
       #  2: The Discovery Network Protocol "broadcast" magic (ie: fe80::)
       The output as jq '[.[] | select(.spec.family == "inet6")] | length' should equal 2
       # Our NDP
-      The output as jq '.[] | select(.spec.family == "inet6" and (.spec.address | startswith("fe80::"))) | .spec.address' should satisfy is_present
+      The output as jq '.[] | select(.spec.family == "inet6" and (.spec.address | test("^fe80::"))) | .spec.address' should satisfy is_present
       # Our publically accessable address
-      The output as jq '.[] | select(.spec.family == "inet6" and (.spec.address | startswith("fe80::") | not)) | .spec.address' should satisfy is_present
+      The output as jq '.[] | select(.spec.family == "inet6" and (.spec.address | test("^fe80::") | not)) | .spec.address' should satisfy is_present
     End
     xIt "should have IPv6 default route"
       When call talosctl get routes -o json

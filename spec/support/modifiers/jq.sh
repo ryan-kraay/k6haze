@@ -11,7 +11,7 @@ shellspec_modifier_jq() {
   # shellcheck disable=SC2034
   SHELLSPEC_META='text'
   if [ "${SHELLSPEC_SUBJECT+x}" ]; then
-    if ! SHELLSPEC_SUBJECT=$(echo "$SHELLSPEC_SUBJECT" | jq -r "$1"); then
+    if ! SHELLSPEC_SUBJECT=$(echo "$SHELLSPEC_SUBJECT" | yq -r "$1"); then
       echo "jq filter is missing or invalid[$1]" >&2
       unset SHELLSPEC_SUBJECT ||:
       return 1
