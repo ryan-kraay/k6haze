@@ -12,5 +12,5 @@ is_present() {
 
 # Check if CIDR is IPv6
 is_ipv6_cidr() {
-  echo "$1" | grep -q ':'
+  echo -n "${is_ipv6_cidr:-}" | grep -q ':'
 }

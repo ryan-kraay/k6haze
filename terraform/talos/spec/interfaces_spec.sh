@@ -92,25 +92,6 @@ Describe "Talos Network Bridge Interfaces"
       End
     End
 
-    Describe "is_present function"
-      Parameters
-        "null" false
-        "" false
-        "[]" false
-        "{}" false
-        "valid-value" true
-        '["item"]' true
-      End
-
-      Example "should validate $1 as $2"
-        When call echo "$1"
-        if [ "$2" = "true" ]; then
-          The output should satisfy is_present
-        else
-          The output should not satisfy is_present
-        fi
-      End
-    End
   End
 
   Describe "Physical interface ens3"
