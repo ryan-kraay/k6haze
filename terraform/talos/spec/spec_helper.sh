@@ -12,5 +12,11 @@ is_present() {
 
 # Check if CIDR is IPv6
 is_ipv6_cidr() {
+  # A RegEx for IPv6 is painfully complicated
+  #  We could use an external tool:
+  #   `ipcalc -6 -c "${is_ipv6_cidr:-}" 2>/dev/null`
+  #  ...but it's such a niche edgecase.
+  #
+  # I'll wait for it to become a problem, then improve it (if necessary)
   echo -n "${is_ipv6_cidr:-}" | grep -q ':'
 }
