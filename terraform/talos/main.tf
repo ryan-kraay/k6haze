@@ -1,5 +1,7 @@
 locals {
   talos_version = "v${var.talos_version}"
+  # Get the first master node's FQDN for cluster endpoint
+  cluster_endpoint = "https://${[for node in var.nodes : node.fqdn if node.is_master][0]}:6443"
 }
 
 # Constructs all the CA's to connect to Talos
@@ -10,7 +12,7 @@ resource "talos_machine_secrets" "this" {
 data "talos_machine_configuration" "this" {
   cluster_name     = var.cluster_name
   machine_type     = "controlplane"
-  cluster_endpoint = "https://${var.master_node.fqdn}:6443"
+  cluster_endpoint = local.cluster_endpoint
   machine_secrets  = talos_machine_secrets.this.machine_secrets
   talos_version    = local.talos_version
 
@@ -22,6 +24,8 @@ data "talos_machine_configuration" "this" {
             # allows us to install cilium
             name = "none"
           }
+          podSubnets     = sort(flatten([for node in var.nodes : node.pod_cidrs]))
+          serviceSubnets = sort(flatten([for node in var.nodes : node.service_cidrs]))
         }
         proxy = {
           # use the cilium replacement for kube-proxy
@@ -34,12 +38,14 @@ data "talos_machine_configuration" "this" {
 }
 
 resource "talos_machine_configuration_apply" "this" {
+  # we need to temporarily cast-off our sensitive flag, so we can use hostname as a key
+  for_each = { for node in nonsensitive(var.nodes) : node.hostname => sensitive(node) }
+
   client_configuration        = talos_machine_secrets.this.client_configuration
   machine_configuration_input = data.talos_machine_configuration.this.machine_configuration
 
-  # endpoint is derrived from node, but misses the sensitive() flag
-  node     = var.master_node.fqdn
-  endpoint = var.master_node.fqdn
+  node     = each.value.fqdn
+  endpoint = each.value.fqdn
 
   config_patches = [
     yamlencode({
@@ -50,25 +56,38 @@ resource "talos_machine_configuration_apply" "this" {
           wipe  = true
         },
         network = {
-          hostname    = var.master_node.hostname
-          interfaces  = var.master_node.interfaces
+          hostname    = each.value.hostname
+          interfaces  = each.value.interfaces
           nameservers = ["2606:4700:4700::1111", "2606:4700:4700::1001", "1.1.1.1", "8.8.8.8"]
         }
         # exposes the talos endpoint
-        certSANs = [var.master_node.fqdn]
+        #  it's unclear if this should refer to the control nodes, each node, or all nodes.
+        certSANs = [each.value.fqdn]
       }
     })
   ]
 }
 
+moved {
+  from = talos_machine_configuration_apply.this
+  to   = talos_machine_configuration_apply.this["shed"]
+}
+
 resource "talos_machine_bootstrap" "this" {
+  # we need to temporarily cast-off our sensitive flag, so we can use hostname as a key
+  for_each = { for node in nonsensitive(var.nodes) : node.hostname => sensitive(node) }
+
   depends_on = [
     talos_machine_configuration_apply.this
   ]
 
-  # endpoint is derrived from node, but misses the sensitive() flag
-  node     = var.master_node.fqdn
-  endpoint = var.master_node.fqdn
+  node     = each.value.fqdn
+  endpoint = each.value.fqdn
 
   client_configuration = talos_machine_secrets.this.client_configuration
+}
+
+moved {
+  from = talos_machine_bootstrap.this
+  to   = talos_machine_bootstrap.this["shed"]
 }

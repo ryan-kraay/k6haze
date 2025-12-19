@@ -7,7 +7,7 @@
     "opentofu@1.10.7",
     "shellspec@0.28.1",
     "talosctl@1.11.5",
-    "yq-go@4.49.2",
+    "yq-go@4.50.1",
   ],
   "env": {
     "PROJECT_ROOT": "{{.DevboxProjectDir}}"
