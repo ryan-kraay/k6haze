@@ -32,6 +32,19 @@ data "talos_machine_configuration" "this" {
           # https://docs.siderolabs.com/kubernetes-guides/cni/deploying-cilium
           disabled = true
         }
+        controllerManager = {
+          extraArgs = {
+            # as near as I can tell, this MUST be less than our podCIDRs
+            #  as a portion of the podCIDRs will be reserved for nodes and
+            #  critical pods.
+            # source: https://wenhan.blog/en/posts/20220126_--node-cidr-mask-size_error/
+            node-cidr-mask-size = "120"
+            # by default it uses 127.0.0.1, but we want ipv6
+            #  ...and hope it won't break monitoring:
+            #  `https://[::1]:10257/metrics`
+            bind-address = "::1"
+          }
+        }
       }
     })
   ]
