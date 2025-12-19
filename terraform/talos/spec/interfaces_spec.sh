@@ -1,15 +1,6 @@
 Describe "Talos Network Bridge Interfaces"
   Include "spec/support/modifiers/yq.sh"
-
-  # Wrapper for talosctl that suppresses non-critical warnings while preserving other stderr
-  talosctl() {
-    command talosctl "$@" 2> >(grep -v "server version.*is older than client version" >&2)
-  }
-
-  # Check if value is present (not null, empty string, empty list, empty map)
-  is_present() {
-    [ "${is_present:-}" != "null" ] && [ "${is_present:-}" != "" ] && [ "${is_present:-}" != "[]" ] && [ "${is_present:-}" != "{}" ]
-  }
+  Include "terraform/talos/spec/spec_helper.sh"
 
   # Get interface data by interface name
   get_interface() {
