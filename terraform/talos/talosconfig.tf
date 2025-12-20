@@ -1,9 +1,9 @@
 data "talos_client_configuration" "this" {
   cluster_name         = var.cluster_name
   client_configuration = talos_machine_secrets.this.client_configuration
-  endpoints            = ["https://${var.master_node.fqdn}:50000"]
+  endpoints            = ["https://${local.cluster_fqdn}:50000"]
   # used by talosctl to contact a member of the cluster
-  nodes = [var.master_node.fqdn]
+  nodes = [local.cluster_fqdn]
 }
 
 resource "local_file" "talosconfig" {
