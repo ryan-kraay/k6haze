@@ -15,7 +15,7 @@
       "  else",
       "    echo \"TALOSCONFIG not found and TALOSCONFIG_TEXT not defined\"",
       "  fi",
-      "fi"
+      "fi",
       // the hashicorp/helm provider uses KUBE_CONFIG_PATH instead of the (established) KUBECONFIG env var
       //  This logic cannot be consolidated into the plugin, as the plugin's init_hook is evaluated _before_ this one is
       "export KUBE_CONFIG_PATH=\"${KUBECONFIG:-}\"",
