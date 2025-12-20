@@ -64,7 +64,7 @@ jobs:
       ## Talos Project
       ##
       TF_VAR_cluster_name: "${{ secrets.TF_VAR_cluster_name }}"
-      TF_VAR_master_node: "${{ secrets.TF_VAR_master_node }}"
+      TF_VAR_nodes: "${{ secrets.TF_VAR_nodes }}"
       TF_VAR_talos_version: "${{ secrets.TF_VAR_talos_version }}"
       # Talos Spec
       TALOSCONFIG_TEXT: "${{ secrets.TALOSCONFIG_TEXT }}"
