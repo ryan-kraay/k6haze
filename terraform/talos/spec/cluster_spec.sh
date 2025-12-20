@@ -44,4 +44,35 @@ Describe "Talos Cluster"
       done
     End
   End
+
+  Describe "Services"
+    # can be obtained by running: `talosctl service`
+    #  TODO: make this dynamic (and skip dashboard)
+    Parameters
+      apid
+      auditd
+      containerd
+      cri
+      etcd
+      kubelet
+      machined
+      syslogd
+      trustd
+      udevd
+    End
+
+    Example "$1 should be running with OK health"
+      get_service_status() {
+        # Replace NODE line with blank line to prevent hostname leakage while preserving line numbers
+        talosctl service "$1" status | sed -e 's/^NODE[[:space:]]\+.*$//'
+      }
+
+      When run get_service_status $1
+      The status should be success
+      # Relying on line numbers is brittle, but there is no json output
+      The line 1 should equal ""
+      The line 3 should match pattern "STATE*Running"
+      The line 4 should match pattern "HEALTH*OK"
+    End
+  End
 End

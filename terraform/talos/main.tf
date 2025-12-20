@@ -45,6 +45,11 @@ data "talos_machine_configuration" "this" {
             bind-address = "::1"
           }
         }
+        scheduler = {
+          extraArgs = {
+            bind-address = "::1"
+          }
+        }
       }
     })
   ]
