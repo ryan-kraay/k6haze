@@ -21,11 +21,12 @@ variable "cluster_name" {
   description = "The name of this kubernetes cluster"
 }
 
-variable "master_node" {
-  description = "Describe the master node"
-  type = object({
-    hostname = string
-    fqdn     = string
+variable "nodes" {
+  description = "List of all cluster nodes (controlplanes and workers)"
+  type = list(object({
+    hostname        = string
+    fqdn            = string
+    is_controlplane = bool
     interfaces = list(object({
       interface = string
       addresses = list(string)
@@ -34,6 +35,8 @@ variable "master_node" {
         gateway = string
       }))
     }))
-  })
+    pod_cidrs     = list(string)
+    service_cidrs = list(string)
+  }))
   sensitive = true
 }

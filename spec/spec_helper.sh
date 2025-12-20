@@ -21,5 +21,5 @@ spec_helper_loaded() {
 spec_helper_configure() {
   # Available functions: import, before_each, after_each, before_all, after_all
   # modelled after: https://github.com/dodie/testing-in-bash/blob/master/example-shellspec/spec/spec_helper.sh
-  import 'support/modifiers/jq'
+  import 'support/modifiers/yq'
 }
