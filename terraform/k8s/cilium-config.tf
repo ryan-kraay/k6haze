@@ -14,7 +14,7 @@ resource "helm_release" "cilium_config" {
   values = [
     yamlencode({
       loadBalancer = {
-        defaultCIDRs   = var.cluster_loadbalancer_default_cidrs
+        defaultCIDRs   = var.cluster.loadbalancer.default_cidrs
         dualstackCIDRs = []               # Empty by default, won't create resource
       }
       gateway = {

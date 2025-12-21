@@ -1,12 +1,6 @@
 locals {
   # Extract all pod CIDRs from nodes
   pod_cidrs = flatten([for node in var.nodes : node.pod_cidrs])
-  
-  # Get the first controlplane node's FQDN
-  cluster_fqdn = [for node in var.nodes : node.fqdn if node.is_controlplane][0]
-  
-  # Get IPv6 address from DNS lookup
-  cluster_ipv6 = var.cluster_ipv6
 }
 
 resource "helm_release" "cilium" {
@@ -151,7 +145,7 @@ resource "helm_release" "cilium" {
     ##
     {
        name = "k8sServiceHost"
-       value = local.cluster_ipv6
+       value = var.cluster.endpoint.ipv6
     }
   ]
 
