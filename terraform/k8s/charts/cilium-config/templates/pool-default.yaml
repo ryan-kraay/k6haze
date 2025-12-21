@@ -1,0 +1,22 @@
+{{- if not (hasKey .Values "loadBalancer") }}
+{{- fail "Values.loadBalancer configuration is required" }}
+{{- else if not (hasKey .Values.loadBalancer "defaultCIDRs") }}
+{{- fail "Values.loadBalancer.defaultCIDRs field is required" }}
+{{- else if not .Values.loadBalancer.defaultCIDRs }}
+{{- fail "Values.loadBalancer.defaultCIDRs must be a non-empty list" }}
+{{- end }}
+apiVersion: cilium.io/v2
+kind: CiliumLoadBalancerIPPool
+metadata:
+  name: default
+spec:
+  allowFirstLastIPs: "No"
+  # ip-pool selectors cannot overlap (otherwise, you don't know which ippool will be used)
+  # The expression give us a "catchall" in the event that the ip-pool label is not used
+  serviceSelector:
+    matchExpressions:
+      - {key: ip-pool, operator: "DoesNotExist"}
+  blocks:
+  {{- range .Values.loadBalancer.defaultCIDRs }}
+  - cidr: "{{ . }}"
+  {{- end }}

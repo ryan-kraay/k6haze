@@ -8,4 +8,17 @@ variable "terraform_statefile_bucket" {
 
 variable "cluster_ipv6" {
   description = "a temporary hack"
+  sensitive = true
+}
+
+variable "cluster_loadbalancer_default_cidrs" {
+  description = "a temporary hack"
+  type = list(string)
+  sensitive = true
+}
+
+variable "cluster_gateway_cirds" {
+  description = "a temporary hack"
+  type = list(string)
+  sensitive = true
 }

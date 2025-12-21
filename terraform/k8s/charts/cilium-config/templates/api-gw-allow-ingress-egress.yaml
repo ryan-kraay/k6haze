@@ -1,0 +1,19 @@
+# You can monitor the requests by running:
+# $ kubectl --namespace=kube-system exec -i -t cilium-xjl4x -- hubble observe -f --identity ingress
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: api-gw-allow-ingress-egress
+spec:
+  description: "Allow all the egress traffic from reserved ingress identity to any endpoints in the cluster."
+  endpointSelector:
+    matchExpressions:
+      - key: reserved:ingress
+        operator: Exists
+  ingress:
+    - fromEntities:
+      - world
+      - cluster
+  egress:
+    - toEntities:
+      - cluster

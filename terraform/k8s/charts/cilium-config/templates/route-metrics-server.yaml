@@ -1,0 +1,20 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: route-metrics-server
+  namespace: kube-system
+spec:
+  description: "A policy which defines the behavior of the metrics server."
+  endpointSelector:
+    matchLabels:
+      io.cilium.k8s.policy.serviceaccount: metrics-server
+#  ingress:
+#  - fromEntities:
+#      - cluster
+#    toPorts:
+#      - ports:
+#         - port: "53"
+#           protocol: ANY
+  egress:
+  - toEntities:
+      - kube-apiserver

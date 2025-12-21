@@ -1,0 +1,13 @@
+# Default values for cilium-config
+# This is a YAML-formatted file.
+
+# Load balancer IP pools
+loadBalancer:
+  defaultCIDRs: []
+#    - "9999:db8::/64"  # Default load balancer CIDRs (required, non-empty)
+  dualstackCIDRs: []  # Dualstack CIDRs (optional, empty by default)
+
+# Gateway configuration
+gateway:
+  CIDRs: []
+#    - "9999:db8::1/128"  # Gateway CIDRs

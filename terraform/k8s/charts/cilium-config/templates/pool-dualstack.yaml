@@ -1,0 +1,14 @@
+{{- if .Values.loadBalancer.dualstackCIDRs }}
+apiVersion: cilium.io/v2
+kind: CiliumLoadBalancerIPPool
+metadata:
+  name: dualstack
+spec:
+  serviceSelector:
+    matchLabels:
+      ip-pool: "dualstack"
+  blocks:
+  {{- range .Values.loadBalancer.dualstackCIDRs }}
+    - cidr: "{{ . }}"
+  {{- end }}
+{{- end }}

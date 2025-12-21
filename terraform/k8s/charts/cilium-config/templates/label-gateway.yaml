@@ -1,0 +1,19 @@
+{{- if not (hasKey .Values "gateway") }}
+{{- fail "Values.gateway configuration is required" }}
+{{- else if not (hasKey .Values.gateway "CIDRs") }}
+{{- fail "Values.gateway.CIDRs field is required" }}
+{{- else if not .Values.gateway.CIDRs }}
+{{- fail "Values.gateway.CIDRs must be a non-empty list" }}
+{{- end }}
+# source: https://docs.cilium.io/en/stable/network/kubernetes/ciliumcidrgroup/#ciliumcidrgroup
+apiVersion: cilium.io/v2
+kind: CiliumCIDRGroup
+metadata:
+  name: gateway
+  labels:
+    role: infra
+spec:
+  externalCIDRs:
+  {{- range .Values.gateway.CIDRs }}
+    - "{{ . }}"
+  {{- end }}
