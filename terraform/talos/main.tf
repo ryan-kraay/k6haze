@@ -46,6 +46,15 @@ data "talos_machine_configuration" "this" {
             bind-address = "::1"
           }
         }
+        # Increase etcd timeouts for high disk latency environments
+        # VPS storage can have random latency spikes that cause etcd failures
+        # See: https://etcd.io/docs/v3.4/tuning/
+        etcd = {
+          extraArgs = {
+            heartbeat-interval = "500"    # Default: 100ms, increase for slow disks
+            election-timeout   = "5000"   # Default: 1000ms, should be 5-10x heartbeat
+          }
+        }
         scheduler = {
           extraArgs = {
             bind-address = "::1"
