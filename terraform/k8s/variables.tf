@@ -5,3 +5,7 @@ variable "cloudflare_account_id" {
 variable "terraform_statefile_bucket" {
   description = "The name of the S3 bucket which will hold our tfstate file"
 }
+
+variable "cluster_ipv6" {
+  description = "a temporary hack"
+}

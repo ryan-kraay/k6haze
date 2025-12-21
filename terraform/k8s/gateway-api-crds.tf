@@ -3,13 +3,13 @@
 #  source: https://docs.cilium.io/en/latest/network/servicemesh/gateway-api/gateway-api/
 # TODO:  I don't know how to automate this via renovate
 resource "helm_release" "gateway_api_crds" {
-  name       = "cilium-gateway-api-crds"
+  name       = "gateway-api-crds"
   repository = "https://wiremind.github.io/wiremind-helm-charts"
   chart      = "gateway-api-crds"
   version    = "1.3.0"
 
-  namespace = "cilium"
-  create_namespace = true
+  namespace = "kube-system"
+  create_namespace = false
   cleanup_on_fail = true
   atomic = true
   max_history = 1
