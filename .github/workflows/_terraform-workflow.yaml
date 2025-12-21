@@ -73,7 +73,7 @@ jobs:
       ##
       ## K8s Project
       ##
-      KUBECONFIG: "${{ secrets.KUBECONFIG }}"
+      KUBECONFIG_TEXT: "${{ secrets.KUBECONFIG_TEXT }}"
       # TF_VAR_cluster <shared>
       # TF_VAR_nodes <shared>
 
