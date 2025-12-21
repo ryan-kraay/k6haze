@@ -24,8 +24,8 @@ resource "helm_release" "cilium" {
 
   max_history = 2
 
-  values = [
-    # We encode/decode just to do some basic syntax checking
+  values = compact([
+    # Main Cilium configuration
     yamlencode(yamldecode(<<-YAML
       ##
       ## Basic IPv6 Support
@@ -45,6 +45,7 @@ resource "helm_release" "cilium" {
           enabled: true
         ui:
           enabled: true
+
       ##
       ## Replace kube-proxy with cilium
       ##
@@ -56,6 +57,7 @@ resource "helm_release" "cilium" {
       loadBalancer:
         mode: dsr
         dsrDispatch: opt
+
       ##
       ## Enable Gateway API
       ##
@@ -66,10 +68,13 @@ resource "helm_release" "cilium" {
         # recommended by talos: https://docs.siderolabs.com/kubernetes-guides/cni/deploying-cilium
         #enableAlpn: true
         #enableAppProtocol: true
+
       ##
       ## Block all Ingress/Egress by default
       ##
       policyEnforcementMode: "always"
+
+      ##
       ## NDP For LoadBalancers/Services
       ##
       # reference: https://blog.grosdouli.dev/blog/cilium-gateway-api-cert-manager-let's-encrypt
@@ -85,6 +90,7 @@ resource "helm_release" "cilium" {
       # source: https://docs.cilium.io/en/latest/network/kubernetes/kubeproxy-free/#neighbor-discovery
       #l2NeighDiscovery:
       #  enabled: true
+
       ##
       ## Talos Support
       ##
@@ -102,8 +108,27 @@ resource "helm_release" "cilium" {
           enabled: false
         hostRoot: /sys/fs/cgroup
     YAML
-    ))
-  ]
+    )),
+    # Tolerations for single-node clusters
+    length(var.nodes) < 2 ? yamlencode({
+      hubble = {
+        relay = {
+          tolerations = [{
+            key      = "node-role.kubernetes.io/control-plane"
+            operator = "Exists"
+            effect   = "NoSchedule"
+          }]
+        }
+        ui = {
+          tolerations = [{
+            key      = "node-role.kubernetes.io/control-plane"
+            operator = "Exists"
+            effect   = "NoSchedule"
+          }]
+        }
+      }
+    }) : null
+  ])
 
   set_list = [
     {
@@ -130,22 +155,6 @@ resource "helm_release" "cilium" {
     }
   ]
 
-
-#  set = [
-#    {
-#      name  = "cluster.enabled"
-#      value = "true"
-#    },
-#    {
-#      name  = "metrics.enabled"
-#      value = "true"
-#    },
-#    {
-#      name  = "service.annotations.prometheus\\.io/port"
-#      value = "9127"
-#      type  = "string"
-#    }
-#  ]
   depends_on = [helm_release.gateway_api_crds]
 }
 
