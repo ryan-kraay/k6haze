@@ -9,12 +9,12 @@ resource "helm_release" "cilium" {
   chart      = "cilium"
   version    = "1.19.0-pre.1"
 
-  namespace = "kube-system"
+  namespace        = "kube-system"
   create_namespace = false
-  cleanup_on_fail = true
-  atomic = true
-  wait = true
-  wait_for_jobs = true
+  cleanup_on_fail  = true
+  atomic           = true
+  wait             = true
+  wait_for_jobs    = true
 
   max_history = 2
 
@@ -126,26 +126,26 @@ resource "helm_release" "cilium" {
 
   set_list = [
     {
-       name = "ipam.operator.clusterPoolIPv6PodCIDRList"
-       # since set_sensitive_list doesn't exist, this parameter
-       #  will be exposed in terraform update/destroy
-       #  see: https://github.com/hashicorp/terraform-provider-helm/issues/1287
-       value = local.pod_cidrs
+      name = "ipam.operator.clusterPoolIPv6PodCIDRList"
+      # since set_sensitive_list doesn't exist, this parameter
+      #  will be exposed in terraform update/destroy
+      #  see: https://github.com/hashicorp/terraform-provider-helm/issues/1287
+      value = local.pod_cidrs
     }
   ]
   set_sensitive = [
     {
-       name = "ipv6NativeRoutingCIDR"
-       # TODO: Cilium requires continuous IP ranges - this will cause problems 
-       # with multi-node setups using non-continuous pod CIDRs
-       value = local.pod_cidrs[0]
+      name = "ipv6NativeRoutingCIDR"
+      # TODO: Cilium requires continuous IP ranges - this will cause problems 
+      # with multi-node setups using non-continuous pod CIDRs
+      value = local.pod_cidrs[0]
     },
     ##
     ## Replace kube-proxy with cilium
     ##
     {
-       name = "k8sServiceHost"
-       value = var.cluster.endpoint.ipv6
+      name  = "k8sServiceHost"
+      value = var.cluster.endpoint.ipv6
     }
   ]
 

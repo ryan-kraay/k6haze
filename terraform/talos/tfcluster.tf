@@ -13,7 +13,7 @@ variable "cluster" {
       public_cidrs  = list(string)
     })
   })
-  nullable = false
+  nullable  = false
   sensitive = true
 
   validation {

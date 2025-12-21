@@ -15,7 +15,7 @@ resource "helm_release" "cilium_config" {
     yamlencode({
       loadBalancer = {
         defaultCIDRs   = var.cluster.loadbalancer.default_cidrs
-        dualstackCIDRs = []               # Empty by default, won't create resource
+        dualstackCIDRs = [] # Empty by default, won't create resource
       }
       gateway = {
         # Extract all IPv6 gateways from node routes and format as /128 CIDRs

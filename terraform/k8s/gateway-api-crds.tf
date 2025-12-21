@@ -8,25 +8,11 @@ resource "helm_release" "gateway_api_crds" {
   chart      = "gateway-api-crds"
   version    = "1.3.0"
 
-  namespace = "kube-system"
+  namespace        = "kube-system"
   create_namespace = false
-  cleanup_on_fail = true
-  atomic = true
-  max_history = 1
-
-#  set = [
-#    {
-#      name  = "cluster.enabled"
-#      value = "true"
-#    },
-#    {
-#      name  = "metrics.enabled"
-#      value = "true"
-#    },
-#    {
-#      name  = "service.annotations.prometheus\\.io/port"
-#      value = "9127"
-#      type  = "string"
-#    }
-#  ]
+  cleanup_on_fail  = true
+  atomic           = true
+  wait             = true
+  wait_for_jobs    = true
+  max_history      = 1
 }
