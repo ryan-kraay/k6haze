@@ -16,9 +16,3 @@ variable "cluster_loadbalancer_default_cidrs" {
   type = list(string)
   sensitive = true
 }
-
-variable "cluster_gateway_cirds" {
-  description = "a temporary hack"
-  type = list(string)
-  sensitive = true
-}

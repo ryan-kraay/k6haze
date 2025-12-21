@@ -18,7 +18,16 @@ resource "helm_release" "cilium_config" {
         dualstackCIDRs = []               # Empty by default, won't create resource
       }
       gateway = {
-        CIDRs = var.cluster_gateway_cirds
+        # Extract all IPv6 gateways from node routes and format as /128 CIDRs
+        CIDRs = sort(distinct(flatten([
+          for node in var.nodes : [
+            for interface in node.interfaces : [
+              for route in interface.routes :
+              "${route.gateway}/128"
+              if strcontains(route.gateway, ":")
+            ]
+          ]
+        ])))
       }
     })
   ]
