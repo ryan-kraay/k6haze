@@ -64,6 +64,7 @@ jobs:
       ## Talos Project
       ##
       TF_VAR_cluster_name: "${{ secrets.TF_VAR_cluster_name }}"
+      TF_VAR_cluster: "${{ secrets.TF_VAR_cluster }}"
       TF_VAR_nodes: "${{ secrets.TF_VAR_nodes }}"
       TF_VAR_talos_version: "${{ secrets.TF_VAR_talos_version }}"
       # Talos Spec
@@ -72,7 +73,9 @@ jobs:
       ##
       ## K8s Project
       ##
-      KUBECONFIG: "${{ secrets.KUBECONFIG }}"
+      KUBECONFIG_TEXT: "${{ secrets.KUBECONFIG_TEXT }}"
+      # TF_VAR_cluster <shared>
+      # TF_VAR_nodes <shared>
 
     steps:
       - name: Generate Token

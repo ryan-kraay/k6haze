@@ -1,0 +1,16 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: route-hubble-ui
+  namespace: kube-system
+spec:
+  description: "Describes the functionality of hubble-ui."
+  endpointSelector:
+    matchLabels:
+      io.cilium.k8s.policy.serviceaccount: hubble-ui
+  egress:
+    - toEntities:
+      - kube-apiserver
+    - toEndpoints:
+      - matchLabels:
+          io.cilium.k8s.policy.serviceaccount: hubble-relay

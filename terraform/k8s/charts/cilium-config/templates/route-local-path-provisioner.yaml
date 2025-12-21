@@ -1,0 +1,13 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: route-local-path-provisioner
+  namespace: kube-system
+spec:
+  description: "Describes the functionality of local-path-provisioner."
+  endpointSelector:
+    matchLabels:
+      io.cilium.k8s.policy.serviceaccount: local-path-provisioner-service-account
+  egress:
+    - toEntities:
+      - kube-apiserver

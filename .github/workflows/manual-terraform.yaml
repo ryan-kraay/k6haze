@@ -12,7 +12,9 @@ on:
         options:
           - curator-github
           - development-talos
+          - development-k8s
           - production-talos
+          - production-k8s
       apply_terraform:
         description: "Apply changes?"
         type: boolean

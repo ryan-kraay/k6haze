@@ -14,6 +14,6 @@ resource "local_file" "kubeconfig" {
 
   content = talos_cluster_kubeconfig.this.kubeconfig_raw
   # TODO:  Propigate "production" as a parameter
-  filename        = "${path.root}/../github/secrets/development-k8s/kubeconfig"
+  filename        = "${path.root}/../github/secrets/development-k8s/KUBECONFIG_TEXT.raw"
   file_permission = "0600"
 }

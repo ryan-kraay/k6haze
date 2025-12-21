@@ -1,0 +1,35 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: route-coredns
+  namespace: kube-system
+spec:
+  description: "A policy which allows anyone within the cluster to make dns requests"
+  endpointSelector:
+    matchLabels:
+      io.cilium.k8s.policy.serviceaccount: coredns
+  ingress:
+  - fromEntities:
+      - cluster
+    toPorts:
+      - ports:
+         - port: "53"
+           protocol: ANY
+  - fromEntities:
+      - cluster
+    icmps:
+      - fields:
+        - type: EchoReply
+          family: IPv6
+  egress:
+  - toEntities:
+      - kube-apiserver
+  - toEntities:
+      - world
+    toPorts:
+      - ports:
+         - port: "53"
+           protocol: ANY
+         - port: "443"
+           protocol: TCP
+

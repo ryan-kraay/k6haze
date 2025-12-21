@@ -1,0 +1,12 @@
+apiVersion: "cilium.io/v2"
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: "route-cluster-ndp"
+spec:
+  description: "Allows Neighbor Discovery Protocol (NDP) hack"
+  endpointSelector: {}
+  egress:
+    - toCIDRSet:
+      # TODO: restrict this to ICMP
+      - cidrGroupRef: gateway
+    

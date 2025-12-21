@@ -1,0 +1,19 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: route-hubble-relay
+  namespace: kube-system
+spec:
+  description: "Describes the functionality of hubble-relay."
+  endpointSelector:
+    matchLabels:
+      io.cilium.k8s.policy.serviceaccount: hubble-relay
+  ingress:
+    - fromEndpoints:
+      - matchLabels:
+          io.cilium.k8s.policy.serviceaccount: hubble-ui
+  egress:
+    - toEntities:
+      # TODO: Restrict this
+      - host
+      - remote-node
