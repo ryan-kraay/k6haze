@@ -2,7 +2,7 @@ client:
   image: nicolaka/netshoot:latest
   
 server:
-  image: python:3-alpine
+  image: nginxinc/nginx-unprivileged:alpine
   port: 80
 
 gateway:

@@ -36,7 +36,7 @@ fDescribe "Connectivity Test"
 
   It "should allow client to connect directly to server pod"
     server_pod=$(command kubectl get pod -n "${TEST_NS}" -l app=server -o jsonpath='{.items[0].status.podIP}')
-    When call client_curl "http://[${server_pod}]:8000"
+    When call client_curl "http://[${server_pod}]:8080"
     The status should be success
     The output as yq '.status' should equal '200'
   End

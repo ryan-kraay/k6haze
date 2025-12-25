@@ -1,3 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-entrypoint-fix
+  namespace: {{ .Release.Namespace }}
+data:
+  entrypoint.sh: |
+    #!/bin/sh
+    # Fix for nginxinc/nginx-unprivileged:alpine - upstream modified default.conf
+    # to only listen on IPv4, breaking IPv6 connectivity in our IPv6-only cluster.
+    # The built-in 10-listen-on-ipv6-by-default.sh script fails because the
+    # checksum validation detects the modified default.conf and exits early.
+    sed -i 's/listen       8080;/listen       8080;\n    listen  [::]:8080;/' /etc/nginx/conf.d/default.conf
+    echo "Updated nginx config for IPv6 support"
+    exec /docker-entrypoint.sh "$@"
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -22,14 +38,17 @@ spec:
       containers:
       - name: server
         image: {{ .Values.server.image }}
-        command: ["python", "-m", "http.server", "8000", "--bind", "::"]
+        command: ["/custom-entrypoint/entrypoint.sh", "nginx", "-g", "daemon off;"]
         ports:
-        - containerPort: 8000
+        - containerPort: 8080
+        volumeMounts:
+        - name: fixed-entrypoint
+          mountPath: /custom-entrypoint/
         readinessProbe:
           httpGet:
             path: /
-            port: 8000
-          initialDelaySeconds: 2
+            port: 8080
+          initialDelaySeconds: 0
           periodSeconds: 1
           timeoutSeconds: 1
           failureThreshold: 3
@@ -44,6 +63,11 @@ spec:
           limits:
             memory: "64Mi"
             cpu: "50m"
+      volumes:
+      - name: fixed-entrypoint
+        configMap:
+          name: nginx-entrypoint-fix
+          defaultMode: 0755
 ---
 apiVersion: v1
 kind: Service
@@ -55,4 +79,4 @@ spec:
     app: server
   ports:
   - port: {{ .Values.server.port }}
-    targetPort: 8000
+    targetPort: 8080
