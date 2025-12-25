@@ -1,5 +1,5 @@
 client:
-  image: busybox:latest
+  image: nicolaka/netshoot:latest
   
 server:
   image: python:3-alpine

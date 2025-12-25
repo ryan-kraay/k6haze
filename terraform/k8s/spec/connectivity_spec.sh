@@ -1,4 +1,5 @@
 fDescribe "Connectivity Test"
+  Include "spec/support/modifiers/yq.sh"
   Include "terraform/k8s/spec/spec_helper.sh"
 
   TEST_NS="connectivity-test"
@@ -25,9 +26,30 @@ fDescribe "Connectivity Test"
     command kubectl exec -n "${TEST_NS}" deployment/client -- timeout 1s "${@}"
   }
 
-  It "should allow client to connect to server"
-    When call client_exec wget -qO- http://server:80
+  client_curl() {
+    client_exec curl -6 -s -w '{"status":%{http_code},"time":%{time_total},"size":%{size_download}}' -o /dev/null "$@"
+  }
+
+  get_server_pod_ip() {
+    kubectl get pod -n "${TEST_NS}" -l app=server -o jsonpath='{.items[0].status.podIP}'
+  }
+
+  It "should allow client to connect directly to server pod"
+    When call client_curl "http://[$(get_server_pod_ip)]:8000"
     The status should be success
-    The output should include "Directory listing"
+    The output as yq '.status' should equal '200'
+  End
+
+  Describe "HTTP connectivity"
+    Parameters
+      "http://server:80"
+      "https://www.google.com/robots.txt"
+    End
+
+    It "should allow client to connect to ${1}"
+      When call client_curl "${1}"
+      The status should be success
+      The output as yq '.status' should equal '200'
+    End
   End
 End
