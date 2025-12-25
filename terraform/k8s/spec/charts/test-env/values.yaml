@@ -1,0 +1,9 @@
+client:
+  image: busybox:latest
+  
+server:
+  image: python:3-alpine
+  port: 80
+
+networkPolicy:
+  enabled: true
