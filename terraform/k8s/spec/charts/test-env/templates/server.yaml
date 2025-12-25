@@ -25,6 +25,14 @@ spec:
         command: ["python", "-m", "http.server", "8000", "--bind", "::"]
         ports:
         - containerPort: 8000
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8000
+          initialDelaySeconds: 2
+          periodSeconds: 1
+          timeoutSeconds: 1
+          failureThreshold: 3
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
