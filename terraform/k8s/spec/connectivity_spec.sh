@@ -23,7 +23,7 @@ fDescribe "Connectivity Test"
   }
 
   client_exec() {
-    command kubectl exec -n "${TEST_NS}" deployment/client -- timeout 1s "${@}"
+    command kubectl exec -n "${TEST_NS}" deployment/good-client -- timeout 1s "${@}"
   }
 
   client_curl() {

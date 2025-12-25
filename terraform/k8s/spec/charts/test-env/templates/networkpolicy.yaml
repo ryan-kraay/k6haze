@@ -2,13 +2,13 @@
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
-  name: allow-client-full-egress
+  name: allow-good-client-full-egress
   namespace: {{ .Release.Namespace }}
 spec:
-  description: "Allow client full egress access"
+  description: "Allow good-client full egress access"
   endpointSelector:
     matchLabels:
-      io.cilium.k8s.policy.serviceaccount: client
+      io.cilium.k8s.policy.serviceaccount: good-client
   egress:
   - {}
   - toEntities:
