@@ -31,11 +31,19 @@ fDescribe "Connectivity Test"
   }
 
   get_server_pod_ip() {
-    kubectl get pod -n "${TEST_NS}" -l app=server -o jsonpath='{.items[0].status.podIP}'
+    command kubectl get pod -n "${TEST_NS}" -l app=server -o jsonpath='{.items[0].status.podIP}'
   }
 
   It "should allow client to connect directly to server pod"
-    When call client_curl "http://[$(get_server_pod_ip)]:8000"
+    server_pod=$(command kubectl get pod -n "${TEST_NS}" -l app=server -o jsonpath='{.items[0].status.podIP}')
+    When call client_curl "http://[${server_pod}]:8000"
+    The status should be success
+    The output as yq '.status' should equal '200'
+  End
+
+  It "should allow client to connect to gateway external IP"
+    gateway_external_ip=$(command kubectl get svc -n "${TEST_NS}" cilium-gateway-internal-gateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+    When call client_curl "http://[${gateway_external_ip}]:8080"
     The status should be success
     The output as yq '.status' should equal '200'
   End
@@ -43,6 +51,7 @@ fDescribe "Connectivity Test"
   Describe "HTTP connectivity"
     Parameters
       "http://server:80"
+      "http://cilium-gateway-internal-gateway:8080"
       "https://www.google.com/robots.txt"
     End
 

@@ -5,5 +5,8 @@ server:
   image: python:3-alpine
   port: 80
 
+gateway:
+  port: 8080
+
 networkPolicy:
   enabled: true
