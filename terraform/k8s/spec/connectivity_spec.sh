@@ -23,40 +23,46 @@ fDescribe "Connectivity Test"
   }
 
   client_exec() {
-    command kubectl exec -n "${TEST_NS}" deployment/good-client -- timeout 1s "${@}"
+    local client_name="$1"
+    shift
+    command kubectl exec -n "${TEST_NS}" deployment/"${client_name}" -- timeout 1s "${@}"
   }
 
   client_curl() {
-    client_exec curl -6 -s -w '{"status":%{http_code},"time":%{time_total},"size":%{size_download}}' -o /dev/null "$@"
+    local client_name="$1"
+    shift
+    client_exec "${client_name}" curl -6 -s -w '{"status":%{http_code},"time":%{time_total},"size":%{size_download}}' -o /dev/null "$@"
   }
 
-  get_server_pod_ip() {
-    command kubectl get pod -n "${TEST_NS}" -l app=server -o jsonpath='{.items[0].status.podIP}'
-  }
+  Describe "Client Tests"
+    Parameters
+      "good-client"
+      "bad-client"
+    End
 
-  It "should allow client to connect directly to server pod"
-    server_pod=$(command kubectl get pod -n "${TEST_NS}" -l app=server -o jsonpath='{.items[0].status.podIP}')
-    When call client_curl "http://[${server_pod}]:8080"
-    The status should be success
-    The output as yq '.status' should equal '200'
-  End
+    It "should allow ${1} to connect directly to server pod"
+      server_pod=$(command kubectl get pod -n "${TEST_NS}" -l app=server -o jsonpath='{.items[0].status.podIP}')
+      When call client_curl "${1}" "http://[${server_pod}]:8080"
+      The status should be success
+      The output as yq '.status' should equal '200'
+    End
 
-  It "should allow client to connect to gateway external IP"
-    gateway_external_ip=$(command kubectl get svc -n "${TEST_NS}" cilium-gateway-internal-gateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
-    When call client_curl "http://[${gateway_external_ip}]:8080"
-    The status should be success
-    The output as yq '.status' should equal '200'
+    It "should allow ${1} to connect to gateway external IP"
+      gateway_external_ip=$(command kubectl get svc -n "${TEST_NS}" cilium-gateway-internal-gateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+      When call client_curl "${1}" "http://[${gateway_external_ip}]:8080"
+      The status should be success
+      The output as yq '.status' should equal '200'
+    End
   End
 
   Describe "HTTP connectivity"
-    Parameters
-      "http://server:80"
-      "http://cilium-gateway-internal-gateway:8080"
-      "https://www.google.com/robots.txt"
+    Parameters:matrix
+      "good-client" "bad-client"
+      "http://server:80" "http://cilium-gateway-internal-gateway:8080" "https://www.google.com/robots.txt"
     End
 
-    It "should allow client to connect to ${1}"
-      When call client_curl "${1}"
+    It "should allow ${1} to connect to ${2}"
+      When call client_curl "${1}" "${2}"
       The status should be success
       The output as yq '.status' should equal '200'
     End

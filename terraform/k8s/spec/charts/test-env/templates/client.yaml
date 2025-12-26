@@ -1,10 +1,10 @@
-{{- range $clientName := list "good-client" "bad-client" }}
----
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{ $clientName }}
-  namespace: {{ $.Release.Namespace }}
+  name: client
+  namespace: {{ .Release.Namespace }}
+---
+{{- range $clientName := list "good-client" "bad-client" }}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -24,7 +24,7 @@ spec:
         k6haze.security.level: untrusted
         {{- end }}
     spec:
-      serviceAccountName: {{ $clientName }}
+      serviceAccountName: client
       # Set to 0 because sleep ignores SIGTERM, so skip graceful shutdown and use SIGKILL immediately
       terminationGracePeriodSeconds: 0
       securityContext:
