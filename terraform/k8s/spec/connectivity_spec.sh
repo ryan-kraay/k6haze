@@ -34,37 +34,65 @@ fDescribe "Connectivity Test"
     client_exec "${client_name}" curl -6 -s -w '{"status":%{http_code},"time":%{time_total},"size":%{size_download}}' -o /dev/null "$@"
   }
 
-  Describe "Client Tests"
-    Parameters
-      "good-client"
-      "bad-client"
-    End
+  get_server_pod_url() {
+    server_pod=$(command kubectl get pod -n "${TEST_NS}" -l app=server -o jsonpath='{.items[0].status.podIP}')
+    echo "http://[${server_pod}]:8080"
+  }
 
-    It "should allow ${1} to connect directly to server pod"
-      server_pod=$(command kubectl get pod -n "${TEST_NS}" -l app=server -o jsonpath='{.items[0].status.podIP}')
-      When call client_curl "${1}" "http://[${server_pod}]:8080"
-      The status should be success
-      The output as yq '.status' should equal '200'
-    End
-
-    It "should allow ${1} to connect to gateway external IP"
-      gateway_external_ip=$(command kubectl get svc -n "${TEST_NS}" cilium-gateway-internal-gateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
-      When call client_curl "${1}" "http://[${gateway_external_ip}]:8080"
-      The status should be success
-      The output as yq '.status' should equal '200'
-    End
-  End
+  get_gateway_external_url() {
+    gateway_ip=$(command kubectl get svc -n "${TEST_NS}" cilium-gateway-internal-gateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+    echo "http://[${gateway_ip}]:8080"
+  }
 
   Describe "HTTP connectivity"
-    Parameters:matrix
-      "good-client" "bad-client"
-      "http://server:80" "http://cilium-gateway-internal-gateway:8080" "https://www.google.com/robots.txt"
+    Parameters:dynamic
+      # pod -> pod
+      desc="pod -> pod"
+      # this is a stub, because shellspec cannot reliably execute a function call from here.
+      url="get_server_pod_url"
+      %data "$desc" "good-client" "$url" true
+      %data "$desc" "bad-client" "$url" false
+
+      # pod -> service
+      desc="pod -> service"
+      url="http://server:80"
+      %data "$desc" "good-client" "$url" true
+      %data "$desc" "bad-client" "$url" false
+
+      # pod -> gateway-api(internal)
+      desc="pod -> gateway-api(internal)"
+      url="http://cilium-gateway-internal-gateway:8080"
+      %data "$desc" "good-client" "$url" true
+      %data "$desc" "bad-client" "$url" false
+
+      # pod -> gateway-api(external)
+      desc="pod -> gateway-api(external)"
+      url="get_gateway_external_url"
+      %data "$desc" "good-client" "$url" true
+      %data "$desc" "bad-client" "$url" true
+
+      # pod -> world
+      desc="pod -> world"
+      url="https://www.google.com/robots.txt"
+      %data "$desc" "good-client" "$url" true
+      %data "$desc" "bad-client" "$url" true
     End
 
-    It "should allow ${1} to connect to ${2}"
-      When call client_curl "${1}" "${2}"
-      The status should be success
-      The output as yq '.status' should equal '200'
+    It "should $( [[ \"$4\" == \"false\" ]] && echo NOT ) allow ${2} to access for ${1}"
+      case "$3" in
+        # ShellSpec has a hard time running local function calls within
+        #  Parameters:dynamic
+        "get_server_pod_url") url=$(get_server_pod_url) ;;
+        "get_gateway_external_url") url=$(get_gateway_external_url) ;;
+        *) url="$3" ;;
+      esac
+      When call client_curl "${2}" "$url"
+      if [[ "$4" == "true" ]]; then
+        The status should be success
+        The output as yq '.status' should equal '200'
+      else
+        The status should not be success
+      fi
     End
   End
 End

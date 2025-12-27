@@ -69,6 +69,11 @@ resource "helm_release" "cilium" {
       policyEnforcementMode: "always"
 
       ##
+      ## Identity-relevant labels - include custom security labels for policy enforcement
+      ##
+      labels: "k6haze\\.security\\.level$"
+
+      ##
       ## NDP For LoadBalancers/Services
       ##
       # reference: https://blog.grosdouli.dev/blog/cilium-gateway-api-cert-manager-let's-encrypt
