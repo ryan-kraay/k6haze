@@ -60,6 +60,7 @@ data "talos_machine_configuration" "this" {
             bind-address = "::1"
           }
         }
+        allowSchedulingOnControlPlanes = true
       }
     })
   ]

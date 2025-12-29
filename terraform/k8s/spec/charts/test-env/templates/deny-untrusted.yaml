@@ -1,0 +1,16 @@
+---
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: deny-untrusted-ingress
+  namespace: {{ .Release.Namespace }}
+spec:
+  description: "Deny ingress from untrusted sources - a workaround for https://github.com/ryan-kraay/k6haze/issues/95"
+  # Apply to ALL pods in this namespace
+  endpointSelector: {}
+  
+  # Deny ingress from untrusted sources
+  ingressDeny:
+  - fromEndpoints:
+    - matchLabels:
+        "k6haze.security.level": "untrusted"
