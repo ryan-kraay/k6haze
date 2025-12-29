@@ -6,8 +6,11 @@ metadata:
   annotations:
     description: "Cluster-wide policy to deny ingress from untrusted sources and external world traffic to all pods/services"
 spec:
-  # Apply to ALL pods cluster-wide
-  endpointSelector: {}
+  # Apply to ALL pods cluster-wide EXCEPT API gateway
+  endpointSelector:
+    matchExpressions:
+    - key: "io.cilium.gateway/owning-gateway"
+      operator: DoesNotExist
   
   # Deny ingress from untrusted sources OR world
   ingressDeny:
