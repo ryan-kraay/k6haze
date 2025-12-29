@@ -1,0 +1,12 @@
+client:
+  image: nicolaka/netshoot:latest
+  
+server:
+  image: nginxinc/nginx-unprivileged:alpine
+  port: 80
+
+gateway:
+  port: 8080
+
+networkPolicy:
+  enabled: true
