@@ -76,6 +76,9 @@ jobs:
       KUBECONFIG_TEXT: "${{ secrets.KUBECONFIG_TEXT }}"
       # TF_VAR_cluster <shared>
       # TF_VAR_nodes <shared>
+      TF_VAR_flux_sync: "${{ secrets.TF_VAR_flux_sync }}"
+      TF_VAR_flux_private_key: "${{ secrets.TF_VAR_flux_private_key }}"
+      TF_VAR_flux_age: "${{ secrets.TF_VAR_flux_age }}"
 
     steps:
       - name: Generate Token
