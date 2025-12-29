@@ -5,6 +5,8 @@
     "cosign@3.0.3",
     "gitsign@0.13.0",
     "sops@3.11.0",
+    "hubble@1.18.3",
+    "cilium-cli@0.18.8",
   ],
   "env": {
     // avoid the need to choose our oauth when using sigstore

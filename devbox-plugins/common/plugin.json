@@ -4,7 +4,8 @@
   "description": "A list of tools shared between the k6haze development and automatic testing pipelines.",
   "packages": [
     "kubectl@1.34.3",
-    "opentofu@1.11.1",
+    "kubernetes-helm@3.19.1",
+    "opentofu@1.11.2",
     "shellspec@0.28.1",
     "talosctl@1.11.5",
     "yq-go@4.50.1",

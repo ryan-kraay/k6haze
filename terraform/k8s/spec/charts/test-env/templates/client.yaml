@@ -1,0 +1,50 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: client
+  namespace: {{ .Release.Namespace }}
+---
+{{- range $clientName := list "good-client" "bad-client" }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $clientName }}
+  namespace: {{ $.Release.Namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ $clientName }}
+  template:
+    metadata:
+      labels:
+        app: {{ $clientName }}
+        {{- if eq $clientName "bad-client" }}
+        k6haze.security.level: untrusted
+        {{- end }}
+    spec:
+      serviceAccountName: client
+      # Set to 0 because sleep ignores SIGTERM, so skip graceful shutdown and use SIGKILL immediately
+      terminationGracePeriodSeconds: 0
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: {{ $clientName }}
+        image: {{ $.Values.client.image }}
+        command: ["sleep", "3600"]
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: ["ALL"]
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+{{- end }}

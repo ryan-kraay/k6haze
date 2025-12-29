@@ -1,0 +1,21 @@
+version: "0.5"
+
+log_level: info
+
+
+processes:
+  hubble-relay:
+    command: "kubectl port-forward -n kube-system service/hubble-relay 4245:80"
+    availability:
+      restart: "always"
+  hubble:
+    command: "cilium hubble ui  --open-browser=false --port-forward 9000"
+    depends-on:
+      - hubble-relay
+  hubble-dropped:
+    command: " hubble observe --verdict DROPPED --follow"
+    depends-on:
+      - hubble-relay
+
+  flux-ui:
+    command: "next -p 3333"
