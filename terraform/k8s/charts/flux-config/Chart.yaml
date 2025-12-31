@@ -1,0 +1,6 @@
+apiVersion: v2
+name: flux-config
+description: Cilium network policies and configuration for fluxcd
+type: application
+version: 0.1.1
+appVersion: "1.0"

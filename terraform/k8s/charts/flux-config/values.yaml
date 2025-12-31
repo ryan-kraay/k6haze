@@ -1,0 +1,8 @@
+# Default values for flux-config
+# This is a YAML-formatted file.
+
+#repo:
+#  privateKey: ""
+#  publicKey: ""
+#  knownHosts: ""
+#  ageKey: "hello world"
