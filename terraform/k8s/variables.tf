@@ -29,3 +29,9 @@ variable "flux_age" {
   nullable    = false
   sensitive   = true
 }
+
+variable "flux_known_hosts" {
+  description = "The known_hosts for our flux repo"
+  nullable    = false
+  sensitive   = true
+}

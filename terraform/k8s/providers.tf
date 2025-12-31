@@ -20,8 +20,14 @@ terraform {
       source  = "hashicorp/helm"
       version = "3.1.1"
     }
+    tls = {
+      source  = "hashicorp/tls"
+      version = "4.1.0"
+    }
   }
 }
 
 provider "helm" {
+}
+provider "tls" {
 }

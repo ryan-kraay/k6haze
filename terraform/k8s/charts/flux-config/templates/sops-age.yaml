@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: sops-age
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: sops-age
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+type: Opaque
+data:
+  # Must end in .agekey
+  repo.agekey: {{ .Values.repo.ageKey | b64enc | quote }}
+

@@ -1,13 +1,14 @@
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
-  name: route-local-path-provisioner
+  name: route-kustomize-controller
   namespace: {{ .Release.Namespace }}
 spec:
-  description: "Describes the functionality of local-path-provisioner."
+  description: "Describes the functionality of kustomize-controller"
   endpointSelector:
     matchLabels:
-      io.cilium.k8s.policy.serviceaccount: local-path-provisioner-service-account
+      io.cilium.k8s.policy.serviceaccount: kustomize-controller
   egress:
     - toEntities:
       - kube-apiserver
+

@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: repo-access
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: repo-access
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+type: Opaque
+data:
+  identity: {{ .Values.repo.privateKey | b64enc | quote }}
+  identity.pub: {{ .Values.repo.publicKey | b64enc | quote }}
+  known_hosts: {{ .Values.repo.knownHosts | b64enc | quote }}
