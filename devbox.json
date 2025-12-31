@@ -7,6 +7,7 @@
     "sops@3.11.0",
     "hubble@1.18.3",
     "cilium-cli@0.18.8",
+    "fluxcd@2.7.5",
   ],
   "env": {
     // avoid the need to choose our oauth when using sigstore
@@ -41,6 +42,44 @@
         // TODO:  Maybe try to create a custom Dockerfile via devbox
         //
         "docker run -it --rm --env HOME=/code --env PATH=/code/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin --workdir=/code --user $(id -u):$(id -g) -v $PWD:/code ubuntu:20.04 kiro-cli chat --agent infra-tdd",
+      ],
+      // Sourcing secrets has gotten redundant and complicated enough, we
+      //   want to move this into our devbox setup.  However, we want to
+      //   make sure it is NOT ran by our GHA.
+      "github-tf": [
+        "set -a",
+        "source <(sops -d ${PROJECT_ROOT}/terraform/github/secrets/shared/cloudflare.sops.env)",
+        "source <(sops -d ${PROJECT_ROOT}/terraform/github/secrets/curator-github/tfstate.sops.env)",
+        "set +a",
+        "tofu -chdir=\"${PROJECT_ROOT}/terraform/github\" \"${@}\"",
+      ],
+      "k8s-tf": [
+        "set -a",
+        "source <(sops -d ${PROJECT_ROOT}/terraform/github/secrets/shared/cloudflare.sops.env)",
+        "source <(sops -d ${PROJECT_ROOT}/terraform/github/secrets/development-k8s/tfstate.sops.env)",
+        "source <(sops -d ${PROJECT_ROOT}/terraform/github/secrets/development-k8s/tfvars.sops.env)",
+        "source <(sops -d ${PROJECT_ROOT}/terraform/github/secrets/development-k8s/tfcluster.sops.env)",
+        "export TF_VAR_flux_age=$(sops -d ${PROJECT_ROOT}/terraform/github/secrets/development-k8s/TF_VAR_flux_age.sops.raw)",
+        "export TF_VAR_flux_known_hosts=$(sops -d ${PROJECT_ROOT}/terraform/github/secrets/development-k8s/TF_VAR_flux_known_hosts.sops.raw)",
+        "export TF_VAR_flux_private_key=$(sops -d ${PROJECT_ROOT}/terraform/github/secrets/development-k8s/TF_VAR_flux_private_key.sops.raw)",
+        "set +a",
+        "tofu -chdir=\"${PROJECT_ROOT}/terraform/k8s\" \"${@}\"",
+      ],
+      "talos-tf": [
+        "set -a",
+        "source <(sops -d ${PROJECT_ROOT}/terraform/github/secrets/shared/cloudflare.sops.env)",
+        "source <(sops -d ${PROJECT_ROOT}/terraform/github/secrets/development-talos/tfstate.sops.env)",
+        "source <(sops -d ${PROJECT_ROOT}/terraform/github/secrets/development-talos/tfvars.sops.env)",
+        "source <(sops -d ${PROJECT_ROOT}/terraform/github/secrets/development-talos/tfcluster.sops.env)",
+        "set +a",
+        "tofu -chdir=\"${PROJECT_ROOT}/terraform/talos\" \"${@}\"",
+      ],
+      // Some tools to diagnose flux
+      "flux-check-all": [
+        "flux get all -A"
+      ],
+      "flux-check-failed": [
+        "flux get all -A --status-selector ready=false"
       ],
     },
   },

@@ -76,9 +76,10 @@ jobs:
       KUBECONFIG_TEXT: "${{ secrets.KUBECONFIG_TEXT }}"
       # TF_VAR_cluster <shared>
       # TF_VAR_nodes <shared>
-      TF_VAR_flux_sync: "${{ secrets.TF_VAR_flux_sync }}"
-      TF_VAR_flux_private_key: "${{ secrets.TF_VAR_flux_private_key }}"
       TF_VAR_flux_age: "${{ secrets.TF_VAR_flux_age }}"
+      TF_VAR_flux_known_hosts: "${{ secrets.TF_VAR_flux_known_hosts }}"
+      TF_VAR_flux_private_key: "${{ secrets.TF_VAR_flux_private_key }}"
+      TF_VAR_flux_sync: "${{ secrets.TF_VAR_flux_sync }}"
 
     steps:
       - name: Generate Token
