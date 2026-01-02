@@ -1,1 +1,1 @@
-environment_names=["curator", "development", "production"]
+environment_names = ["curator", "development", "production"]
