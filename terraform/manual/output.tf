@@ -7,5 +7,5 @@ output "buckets" {
 
 output "cloudflare_account_id" {
   description = "The unique account id"
-  value = local.account_id
+  value       = local.account_id
 }

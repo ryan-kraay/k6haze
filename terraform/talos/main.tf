@@ -51,8 +51,8 @@ data "talos_machine_configuration" "this" {
         # See: https://etcd.io/docs/v3.4/tuning/
         etcd = {
           extraArgs = {
-            heartbeat-interval = "500"    # Default: 100ms, increase for slow disks
-            election-timeout   = "5000"   # Default: 1000ms, should be 5-10x heartbeat
+            heartbeat-interval = "500"  # Default: 100ms, increase for slow disks
+            election-timeout   = "5000" # Default: 1000ms, should be 5-10x heartbeat
           }
         }
         scheduler = {
