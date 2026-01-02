@@ -1,4 +1,4 @@
-fDescribe "Connectivity Test"
+Describe "Connectivity Test"
   Include "spec/support/modifiers/yq.sh"
   Include "terraform/k8s/spec/spec_helper.sh"
 
