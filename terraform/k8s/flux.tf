@@ -62,6 +62,12 @@ resource "helm_release" "flux" {
       },
       imageReflectionController = {
         create = false
+      },
+      kustomizeController = {
+        container = {
+          # https://fluxcd.io/flux/components/kustomize/kustomizations/#post-build-variable-substitution
+          additionalArgs = ["--feature-gates=StrictPostBuildSubstitutions=true"]
+        }
       }
     })
   ]
@@ -113,6 +119,10 @@ resource "helm_release" "flux_homelab" {
     {
       name  = "kustomization.spec.path"
       value = var.flux_sync.path
+    },
+    {
+      name  = "kustomization.spec.postBuild.substitute.root_domain"
+      value = var.root_domain
     }
   ]
   depends_on = [helm_release.flux]
