@@ -6,7 +6,22 @@ To make this project more of a challenge, we're going to doing this as _cheap/fr
 
 # The Current State
 
-At the moment, the state of this project is **unusable**.  We have a very rough patch-work of PoC's, but nothing has been consolidated _nor_ tested _- yet!_
+At the moment, the state of this project is **functional but undocumented**.  Consider this **early alpha**.
+
+We currently have:
+ * Secrets stored as GitHub Secrets and automatically deployed via Terraform
+     * Secrets are encrypted at rest via SOPS/age.
+ * After a one-time (manual) bootstrap process, the VPS is running Talos managed by Terraform
+     * It _is_ using IPv6 "largely".
+ * Kubernetes is then deploying cilium and flux via Terraform
+ * We have extensive test suites confirming the functionality and networking functionality of k8s and cilium
+     * At the time of this writing we have 50% hcl and 50% shell.  The "shell" are our unit tests.
+ * Renovate continuously monitors and upgrades all our dependencies, _pending_ that our test suite passes.
+     * Changes are applied automatically to our "development" VPS.
+
+Focus, at the moment, is on improving the maintainability of the flux repo.  _That means this repo will receive
+fewer commits_.  I also needed to separate the flux repo from this repo, as we're using IPv6 only and at
+the moment [github does not provide IPv6](https://doesgithubhaveipv6yet.com/).
 
 # Project Goals
 

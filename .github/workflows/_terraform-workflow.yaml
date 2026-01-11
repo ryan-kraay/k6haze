@@ -80,6 +80,7 @@ jobs:
       TF_VAR_flux_known_hosts: "${{ secrets.TF_VAR_flux_known_hosts }}"
       TF_VAR_flux_private_key: "${{ secrets.TF_VAR_flux_private_key }}"
       TF_VAR_flux_sync: "${{ secrets.TF_VAR_flux_sync }}"
+      TF_VAR_root_domain: "${{ secrets.TF_VAR_root_domain }}"
 
     steps:
       - name: Generate Token

@@ -35,3 +35,9 @@ variable "flux_known_hosts" {
   nullable    = false
   sensitive   = true
 }
+
+variable "root_domain" {
+  description = "Flux will host various domains (ie: www).  These will exist _under_ the root_domain (ie: example.com)"
+  nullable    = false
+  sensitive   = true
+}
