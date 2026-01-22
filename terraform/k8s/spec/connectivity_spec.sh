@@ -11,6 +11,7 @@ Describe "Connectivity Test"
   setup_test_environment() {
     helm upgrade --install "$TEST_RELEASE" terraform/k8s/spec/charts/test-env \
       -n "$TEST_NS" --create-namespace --wait --timeout=300s
+    command kubectl wait --for=jsonpath='{.status.state}'=ready ciliumendpoint --all -n "$TEST_NS" --timeout=60s
   }
 
   cleanup_test_environment() {
@@ -25,7 +26,7 @@ Describe "Connectivity Test"
   client_exec() {
     local client_name="$1"
     shift
-    command kubectl exec -n "${TEST_NS}" deployment/"${client_name}" -- timeout 1s "${@}"
+    command kubectl exec -n "${TEST_NS}" deployment/"${client_name}" -- timeout 5s "${@}"
   }
 
   client_curl() {
