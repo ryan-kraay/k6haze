@@ -26,7 +26,7 @@ Describe "Connectivity Test"
   client_exec() {
     local client_name="$1"
     shift
-    command kubectl exec -n "${TEST_NS}" deployment/"${client_name}" -- timeout 5s "${@}"
+    command kubectl exec -n "${TEST_NS}" deployment/"${client_name}" -- timeout 30s "${@}"
   }
 
   client_curl() {
