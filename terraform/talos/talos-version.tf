@@ -4,7 +4,7 @@ module "talos_version" {
 
   k8s_version   = null
   talos_version = local.talos_version # TODO: Remove local.talos_verison
-  s3_bucket = var.terraform_statefile_bucket
+  s3_bucket     = var.terraform_statefile_bucket
 }
 
 # Create a resource that our resources can be triggered by
