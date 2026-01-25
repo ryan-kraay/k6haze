@@ -1,6 +1,5 @@
 locals {
-  #talos_version = "v${var.talos_version}"
-  talos_version = "v1.12.2"
+  talos_version = "v${var.talos_version}"
   # Get the first controlplane node's FQDN for cluster endpoint
   cluster_fqdn     = [for node in var.nodes : node.fqdn if node.is_controlplane][0]
   cluster_endpoint = "https://${local.cluster_fqdn}:6443"
