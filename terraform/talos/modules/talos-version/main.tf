@@ -15,6 +15,39 @@ data "external" "k8s_version_check" {
 }
 
 ##
+## S3 State Management
+##
+
+data "external" "last_wipe_state" {
+  # TODO expose var.s3_bucket
+  program = ["bash", "${path.module}/scripts/lib.sh", "get_last_wipe_state", var.s3_path]
+}
+
+locals {
+  current_talos_version = var.talos_version == null ? data.external.talos_version.result.version : var.talos_version
+}
+
+resource "aws_s3_object" "talos_wipe_state" {
+  bucket = var.s3_bucket
+  key    = var.s3_path
+  content = jsonencode({
+    last_wipe_at = (data.external.talos_version_check.result.comparison == "downgrade" || data.external.k8s_version_check.result.comparison == "downgrade") ? timestamp() : data.external.last_wipe_state.result.last_wipe_at
+  })
+
+  lifecycle {
+    precondition {
+      condition     = !(data.external.talos_version_check.result.comparison == "downgrade" && var.upgrade_policy == "no_wipe")
+      error_message = "Talos downgrade detected but upgrade_policy is 'no_wipe'"
+    }
+
+    precondition {
+      condition     = !(data.external.k8s_version_check.result.comparison == "downgrade" && var.upgrade_policy == "no_wipe")
+      error_message = "K8s downgrade detected but upgrade_policy is 'no_wipe'"
+    }
+  }
+}
+
+##
 ## Talos
 ##
 
@@ -47,7 +80,7 @@ resource "terraform_data" "desired_k8s" {
 }
 
 ##
-## Trigger (when either talos or k8s have changed)
+## Wipe (only on downgrades)
 ##
 
 resource "terraform_data" "wipe_filesystem" {
@@ -56,18 +89,8 @@ resource "terraform_data" "wipe_filesystem" {
     command = (data.external.talos_version_check.result.comparison == "downgrade" || data.external.k8s_version_check.result.comparison == "downgrade" || var.upgrade_policy == "force_wipe") ? "talosctl reset --system-labels-to-wipe EPHEMERAL --reboot --graceful=false" : "echo 'No wipe needed'"
   }
 
-  # Force recreation when either version changes
+  # Force recreation when S3 state changes (only on downgrades)
   lifecycle {
-    replace_triggered_by = [terraform_data.desired_talos, terraform_data.desired_k8s]
-
-    precondition {
-      condition     = !(data.external.talos_version_check.result.comparison == "downgrade" && var.upgrade_policy == "no_wipe")
-      error_message = "Talos downgrade detected but upgrade_policy is 'no_wipe'"
-    }
-
-    precondition {
-      condition     = !(data.external.k8s_version_check.result.comparison == "downgrade" && var.upgrade_policy == "no_wipe")
-      error_message = "K8s downgrade detected but upgrade_policy is 'no_wipe'"
-    }
+    replace_triggered_by = [aws_s3_object.talos_wipe_state]
   }
 }

@@ -21,3 +21,13 @@ variable "upgrade_policy" {
   }
 }
 
+variable "s3_bucket" {
+  description = "The S3 bucket to write our talos-wipe-state"
+  nullable = false
+}
+
+variable "s3_path" {
+  description = "The name of the file in var.s3_bucket, which contains our talos-wipe-state"
+  default = "/talos-wipe-state.json"
+  nullable = false
+}
