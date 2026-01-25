@@ -74,12 +74,21 @@
         "set +a",
         "tofu -chdir=\"${PROJECT_ROOT}/terraform/talos\" \"${@}\"",
       ],
+      "talos-spec": [
+        // Since talos-spec needs access to S3, we need to expand the credentials
+        "set -a",
+        "source <(sops -d ${PROJECT_ROOT}/terraform/github/secrets/shared/cloudflare.sops.env)",
+        "source <(sops -d ${PROJECT_ROOT}/terraform/github/secrets/development-talos/tfstate.sops.env)",
+        "set +a",
+        "env | grep AWS",
+        "shellspec \"${PROJECT_ROOT}/terraform/talos\" --format documentation \"${@}\""
+      ],
       // Some tools to diagnose flux
       "flux-check-all": [
-        "flux get all -A"
+        "flux get all -A",
       ],
       "flux-check-failed": [
-        "flux get all -A --status-selector ready=false"
+        "flux get all -A --status-selector ready=false",
       ],
     },
   },
