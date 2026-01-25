@@ -76,6 +76,7 @@ resource "talos_machine_configuration_apply" "this" {
   node     = each.value.fqdn
   endpoint = each.value.fqdn
 
+
   config_patches = [
     yamlencode({
       machine = {
@@ -95,6 +96,11 @@ resource "talos_machine_configuration_apply" "this" {
       }
     })
   ]
+
+  # Force recreation when version changes
+  lifecycle {
+    replace_triggered_by = [terraform_data.talos_version_change]
+  }
 }
 
 moved {
@@ -106,14 +112,19 @@ resource "talos_machine_bootstrap" "this" {
   # we need to temporarily cast-off our sensitive flag, so we can use hostname as a key
   for_each = { for node in nonsensitive(var.nodes) : node.hostname => sensitive(node) }
 
-  depends_on = [
-    talos_machine_configuration_apply.this
-  ]
-
   node     = each.value.fqdn
   endpoint = each.value.fqdn
 
   client_configuration = talos_machine_secrets.this.client_configuration
+
+  depends_on = [
+    talos_machine_configuration_apply.this
+  ]
+
+  # Force recreation when version changes
+  lifecycle {
+    replace_triggered_by = [terraform_data.talos_version_change]
+  }
 }
 
 moved {
