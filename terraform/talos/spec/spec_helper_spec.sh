@@ -40,4 +40,24 @@ Describe "Talos Spec Helper Functions"
       fi
     End
   End
+
+  Describe "is_semver function"
+    Parameters
+      "v1.2.3" true
+      "v10.20.30" true
+      "1.2.3" false
+      "v1.2" false
+      "v1.2.3.4" false
+      "invalid" false
+    End
+
+    Example "should validate $1 as semver: $2"
+      When call echo "$1"
+      if [ "$2" = "true" ]; then
+        The output should satisfy is_semver
+      else
+        The output should not satisfy is_semver
+      fi
+    End
+  End
 End

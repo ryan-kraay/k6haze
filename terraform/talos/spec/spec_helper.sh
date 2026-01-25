@@ -20,3 +20,8 @@ is_ipv6_cidr() {
   # I'll wait for it to become a problem, then improve it (if necessary)
   echo -n "${is_ipv6_cidr:-}" | grep -q ':'
 }
+
+# Check if value is a valid semver (v1.2.3 format)
+is_semver() {
+  echo -n "${is_semver:-}" | egrep -q '^v[0-9]+\.[0-9]+\.[0-9]+$'
+}
