@@ -106,20 +106,20 @@ resource "talos_machine_configuration_apply" "this" {
           match = "system_disk"
         }
         minSize = "20GB"
-        maxSize = "40GB"
+        maxSize = "25GB"
         grow    = false
       }
     }),
     yamlencode({
       apiVersion = "v1alpha1"
       kind       = "UserVolumeConfig"
-      name       = "insecure"
+      name       = "local-insecure"
       provisioning = {
         diskSelector = {
           match = "system_disk"
         }
-        minSize = "5GB"
-        maxSize = "10GB"
+        minSize = "1GB"
+        maxSize = "2GB"
         grow    = false
       }
     })
