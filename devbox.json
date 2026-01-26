@@ -2,10 +2,10 @@
   "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.16.0/.schema/devbox.schema.json",
   "packages": [
     "age@1.3.1",
-    "cosign@3.0.3",
+    "cosign@3.0.4",
     "gitsign@0.13.0",
     "sops@3.11.0",
-    "hubble@1.18.3",
+    "hubble@1.18.5",
     "cilium-cli@0.18.8",
     "fluxcd@2.7.5",
   ],
@@ -74,12 +74,21 @@
         "set +a",
         "tofu -chdir=\"${PROJECT_ROOT}/terraform/talos\" \"${@}\"",
       ],
+      "talos-spec": [
+        // Since talos-spec needs access to S3, we need to expand the credentials
+        "set -a",
+        "source <(sops -d ${PROJECT_ROOT}/terraform/github/secrets/shared/cloudflare.sops.env)",
+        "source <(sops -d ${PROJECT_ROOT}/terraform/github/secrets/development-talos/tfstate.sops.env)",
+        "set +a",
+        "env | grep AWS",
+        "shellspec \"${PROJECT_ROOT}/terraform/talos\" --format documentation \"${@}\""
+      ],
       // Some tools to diagnose flux
       "flux-check-all": [
-        "flux get all -A"
+        "flux get all -A",
       ],
       "flux-check-failed": [
-        "flux get all -A --status-selector ready=false"
+        "flux get all -A --status-selector ready=false",
       ],
     },
   },
