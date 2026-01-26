@@ -10,6 +10,7 @@ resource "talos_machine_secrets" "this" {
   talos_version = local.talos_version
 }
 
+# Configuration for the cluster
 data "talos_machine_configuration" "this" {
   cluster_name     = var.cluster_name
   machine_type     = "controlplane"
@@ -66,6 +67,7 @@ data "talos_machine_configuration" "this" {
   ]
 }
 
+# Configuration on a per-node basis
 resource "talos_machine_configuration_apply" "this" {
   # we need to temporarily cast-off our sensitive flag, so we can use hostname as a key
   for_each = { for node in nonsensitive(var.nodes) : node.hostname => sensitive(node) }
@@ -93,6 +95,32 @@ resource "talos_machine_configuration_apply" "this" {
         # exposes the talos endpoint
         #  it's unclear if this should refer to the control nodes, each node, or all nodes.
         certSANs = [each.value.fqdn]
+      }
+    }),
+    yamlencode({
+      apiVersion = "v1alpha1"
+      kind       = "VolumeConfig"
+      name       = "EPHEMERAL"
+      provisioning = {
+        diskSelector = {
+          match = "system_disk"
+        }
+        minSize = "20GB"
+        maxSize = "40GB"
+        grow    = false
+      }
+    }),
+    yamlencode({
+      apiVersion = "v1alpha1"
+      kind       = "UserVolumeConfig"
+      name       = "insecure"
+      provisioning = {
+        diskSelector = {
+          match = "system_disk"
+        }
+        minSize = "5GB"
+        maxSize = "10GB"
+        grow    = false
       }
     })
   ]
