@@ -90,7 +90,7 @@ resource "talos_machine_configuration_apply" "this" {
         network = {
           hostname    = each.value.hostname
           interfaces  = each.value.interfaces
-          nameservers = ["2606:4700:4700::1111", "2606:4700:4700::1001", "1.1.1.1", "8.8.8.8"]
+          nameservers = var.nameservers
         }
         # exposes the talos endpoint
         #  it's unclear if this should refer to the control nodes, each node, or all nodes.
