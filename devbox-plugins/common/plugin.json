@@ -8,7 +8,7 @@
     "opentofu@1.11.4",
     "rclone@1.73.0",
     "shellspec@0.28.1",
-    "talosctl@1.12.2",
+    "talosctl@1.12.3",
     "yq-go@4.52.2",
   ],
   "env": {
