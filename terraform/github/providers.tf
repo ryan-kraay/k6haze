@@ -19,7 +19,7 @@ terraform {
     # Necessary to acces S3 tfstate
     cloudflare = {
       source  = "cloudflare/cloudflare"
-      version = "5.16.0"
+      version = "5.17.0"
     }
     # Necessary to decrypt local secrets
     sops = {
@@ -29,7 +29,7 @@ terraform {
     # necessary to modify our gitrepo
     github = {
       source  = "integrations/github"
-      version = "6.10.2"
+      version = "6.11.1"
     }
   }
 }
