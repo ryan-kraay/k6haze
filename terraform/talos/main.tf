@@ -88,7 +88,6 @@ resource "talos_machine_configuration_apply" "this" {
           wipe  = true
         },
         network = {
-          hostname    = each.value.hostname
           interfaces  = each.value.interfaces
           nameservers = var.nameservers
         }
@@ -96,6 +95,13 @@ resource "talos_machine_configuration_apply" "this" {
         #  it's unclear if this should refer to the control nodes, each node, or all nodes.
         certSANs = [each.value.fqdn]
       }
+    }),
+    yamlencode({
+      # see: https://github.com/siderolabs/terraform-provider-talos/issues/296
+      apiVersion = "v1alpha1"
+      kind       = "HostnameConfig"
+      auto       = "off"
+      hostname   = each.value.hostname
     }),
     yamlencode({
       apiVersion = "v1alpha1"
