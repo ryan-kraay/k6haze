@@ -19,7 +19,7 @@ terraform {
     # Necessary to acces S3 tfstate
     cloudflare = {
       source  = "cloudflare/cloudflare"
-      version = "5.17.0"
+      version = "5.18.0"
     }
     # Necessary to decrypt local secrets
     sops = {
