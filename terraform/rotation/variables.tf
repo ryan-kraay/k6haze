@@ -22,10 +22,13 @@ variable "environment_names" {
   default = ["production"]
 }
 
-variable "rotation_days" {
-  description = "The period that keys should be rotated"
-  default     = 30
+variable "project_names" {
+  description = "The names of the projects, which should match /terraform/<project_name>.  ie (talos, k8s, etc)"
+  type        = list(string)
+  nullable    = false
+  default     = ["talos"]
 }
+
 variable "rotation_minutes" {
   description = "The period that keys should be rotated"
   default     = 10

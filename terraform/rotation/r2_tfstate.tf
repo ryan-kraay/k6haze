@@ -7,16 +7,15 @@ data "cloudflare_account_api_token_permission_groups_list" "r2" {
   name       = urlencode(each.key)
 }
 
-# TODO rename this to tfstates
-resource "cloudflare_r2_bucket" "tfstate" {
-  for_each   = toset(var.environment_names)
+resource "cloudflare_r2_bucket" "tfstates" {
+  for_each   = toset(keys(local.projects))
   account_id = local.cloudflare_account_id
   name       = "k6haze-${each.key}-tfstate"
   location   = "WEUR"
 }
 
 resource "cloudflare_account_token" "alpha" {
-  for_each = cloudflare_r2_bucket.tfstate
+  for_each = cloudflare_r2_bucket.tfstates
 
   account_id = local.cloudflare_account_id
   name       = "${each.value.name} R/W ALPHA - ${formatdate("YYYYMMDD", time_rotating.alpha.rfc3339)}"
@@ -39,7 +38,7 @@ resource "cloudflare_account_token" "alpha" {
 }
 
 resource "cloudflare_account_token" "beta" {
-  for_each = cloudflare_r2_bucket.tfstate
+  for_each = cloudflare_r2_bucket.tfstates
 
   account_id = local.cloudflare_account_id
   name       = "${each.value.name} R/W BETA - ${formatdate("YYYYMMDD", time_rotating.beta.rfc3339)}"
