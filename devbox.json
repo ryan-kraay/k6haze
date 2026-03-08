@@ -32,7 +32,7 @@
         // export GITHUB_COM_TOKEN=github_pat_XXXX
         "docker run -it --rm -v $PWD:/repo -w /repo -e GITHUB_COM_TOKEN=${GITHUB_COM_TOKEN:-} -e LOG_LEVEL=debug renovate/renovate:latest --platform=local --repository-cache=reset \"${@}\"",
       ],
-      "kiro-cli": [
+      "kiro": [
         // installation was clunky:
         //   I launched a docker image, ran `apt install curl ca-certificates unzip --no-install-recommends` then copied $HOME/.local/bin /code/.local/bin
         //
@@ -41,7 +41,8 @@
         //
         // TODO:  Maybe try to create a custom Dockerfile via devbox
         //
-        "docker run -it --rm --env HOME=/code --env PATH=/code/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin --workdir=/code --user $(id -u):$(id -g) -v $PWD:/code ubuntu:20.04 kiro-cli chat --agent infra-tdd",
+        "set -ex",
+        "docker run -it --rm --env HOME=/code --workdir=/code --user $(id -u):$(id -g) -v $PWD:/code k6haze-devbox:0.0.5 kiro-cli chat --agent infra-tdd",
       ],
       // Sourcing secrets has gotten redundant and complicated enough, we
       //   want to move this into our devbox setup.  However, we want to

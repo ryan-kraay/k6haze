@@ -7,6 +7,7 @@ data "cloudflare_account_api_token_permission_groups_list" "r2" {
   name       = urlencode(each.key)
 }
 
+# TODO rename this to tfstates
 resource "cloudflare_r2_bucket" "tfstate" {
   for_each   = toset(var.environment_names)
   account_id = local.cloudflare_account_id
