@@ -35,5 +35,5 @@ locals {
     beta  = customcrud.age_keygen_beta
   }
   # Choose the newest age_keygen
-  age_keygen = timecmp(time_rotating.alpha.rotation_rfc3339, time_rotating.beta.rotation_rfc3339) > 1 ? customcrud.age_keygen_alpha : customcrud.age_keygen_beta
+  latest_age_keygen = timecmp(time_rotating.alpha.rotation_rfc3339, time_rotating.beta.rotation_rfc3339) > 1 ? customcrud.age_keygen_alpha : customcrud.age_keygen_beta
 }
