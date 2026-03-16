@@ -51,5 +51,5 @@ locals {
     }
   }
   # Choose the newest age_keygen
-  latest_age_keygen = timecmp(time_rotating._alpha.rotation_rfc3339, time_rotating._beta.rotation_rfc3339) > 1 ? customcrud.age_keygen_alpha : customcrud.age_keygen_beta
+  latest_age_keygen = timecmp(time_rotating._alpha.rotation_rfc3339, time_rotating._beta.rotation_rfc3339) == 1 ? customcrud.age_keygen_alpha : customcrud.age_keygen_beta
 }

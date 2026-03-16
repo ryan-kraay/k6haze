@@ -19,7 +19,9 @@ resource "time_rotating" "_beta" {
   rotation_minutes = var.rotation_minutes
 
   # Stagger slot to overlap during rotation
-  rfc3339 = timeadd(time_rotating._alpha.rotation_rfc3339, "-${floor(var.rotation_minutes / 2)}m")
+  # TODO: negative timeadd() does not subtract (but TF docs says it should)
+  #rfc3339 = timeadd(time_rotating._alpha.rotation_rfc3339, "-${floor(var.rotation_minutes / 2)}m")
+  rfc3339 = timeadd(time_rotating._alpha.rfc3339, "${floor(var.rotation_minutes / 2)}m")
 
   lifecycle {
     # Avoid re-triggering after bootstrap MUST BE static
