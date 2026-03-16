@@ -12,6 +12,10 @@ resource "local_file" "sops_yaml" {
   file_permission      = "0644"
 }
 
+locals {
+  last_decryption_secrets = var.recovery != null ? var.recovery : local.age_private_keys
+}
+
 resource "terraform_data" "reencrypt_secrets" {
   for_each = local.projects
 
@@ -20,7 +24,7 @@ resource "terraform_data" "reencrypt_secrets" {
   ]
 
   provisioner "local-exec" {
-    command = "(cd ${path.module}/../${each.value.project_name}/secrets/${each.value.environment_name} && SOPS_AGE_KEY_FILE=$${SOPS_AGE_KEY_FILE:-./age.key} sops updatekeys -y *.sops.*)"
+    command = "(cd ${path.module}/../${each.value.project_name}/secrets/${each.value.environment_name} && SOPS_AGE_KEY=\"${join("\n", values(local.last_decryption_secrets[each.key]))}\" sops updatekeys -y *.sops.*)"
   }
 
   depends_on = [local_file.sops_yaml]

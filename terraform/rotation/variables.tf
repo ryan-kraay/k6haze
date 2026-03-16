@@ -29,6 +29,15 @@ variable "project_names" {
   default     = ["talos"]
 }
 
+variable "recovery" {
+  description = "The private age keys used to recover and rotate expired secrets"
+  type        = map(map(string))
+  nullable    = true
+  default     = null
+  sensitive   = true
+}
+
+
 variable "rotation_minutes" {
   description = "The period that keys should be rotated"
   default     = 10

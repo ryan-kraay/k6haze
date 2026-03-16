@@ -18,7 +18,7 @@ resource "cloudflare_account_token" "alpha" {
   for_each = cloudflare_r2_bucket.tfstates
 
   account_id = local.cloudflare_account_id
-  name       = "${each.value.name} R/W ALPHA - ${formatdate("YYYYMMDD", time_rotating.alpha.rfc3339)}"
+  name       = "${each.value.name} R/W ALPHA - ${formatdate("YYYYMMDD", time_rotating._alpha.rfc3339)}"
 
   policies = [{
     effect = "allow"
@@ -30,10 +30,10 @@ resource "cloudflare_account_token" "alpha" {
     })
   }]
 
-  expires_on = time_rotating.alpha.rotation_rfc3339
+  expires_on = time_rotating._alpha.rotation_rfc3339
 
   lifecycle {
-    replace_triggered_by = [time_rotating.alpha]
+    replace_triggered_by = [time_static.alpha]
   }
 }
 
@@ -41,7 +41,7 @@ resource "cloudflare_account_token" "beta" {
   for_each = cloudflare_r2_bucket.tfstates
 
   account_id = local.cloudflare_account_id
-  name       = "${each.value.name} R/W BETA - ${formatdate("YYYYMMDD", time_rotating.beta.rfc3339)}"
+  name       = "${each.value.name} R/W BETA - ${formatdate("YYYYMMDD", time_rotating._beta.rfc3339)}"
 
   policies = [{
     effect = "allow"
@@ -53,15 +53,15 @@ resource "cloudflare_account_token" "beta" {
     })
   }]
 
-  expires_on = time_rotating.beta.rotation_rfc3339
+  expires_on = time_rotating._beta.rotation_rfc3339
 
   lifecycle {
-    replace_triggered_by = [time_rotating.beta]
+    replace_triggered_by = [time_static.beta]
   }
 }
 
 locals {
   # Choose the latest expiration
-  cloudflare_account_token = timecmp(time_rotating.alpha.rotation_rfc3339, time_rotating.beta.rotation_rfc3339) > 1 ? cloudflare_account_token.alpha : cloudflare_account_token.beta
+  cloudflare_account_token = timecmp(time_rotating._alpha.rotation_rfc3339, time_rotating._beta.rotation_rfc3339) > 1 ? cloudflare_account_token.alpha : cloudflare_account_token.beta
 }
 
