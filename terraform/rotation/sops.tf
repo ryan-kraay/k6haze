@@ -24,7 +24,12 @@ resource "terraform_data" "reencrypt_secrets" {
   ]
 
   provisioner "local-exec" {
-    command = "(cd ${path.module}/../${each.value.project_name}/secrets/${each.value.environment_name} && SOPS_AGE_KEY=\"${join("\n", values(local.last_decryption_secrets[each.key]))}\" sops updatekeys -y *.sops.*)"
+    # The find-command allows us to gracefully skip, if there are no '*.sops.*' in our destination folder
+    command = "cd ${path.module}/../${each.value.project_name}/secrets/${each.value.environment_name} && find . -maxdepth 1 -name '*.sops.*' ! -name '.sops.yaml' | xargs -r sops updatekeys -y"
+
+    environment = {
+      SOPS_AGE_KEY = sensitive(join("\n", values(local.last_decryption_secrets[each.key])))
+    }
   }
 
   depends_on = [local_file.sops_yaml]
@@ -36,11 +41,11 @@ resource "customcrud" "tfstate_secrets" {
   input = {
     path = "${path.module}/../${each.value.project_name}/secrets/${each.value.environment_name}/tfstate.sops.env"
     content = sensitive(<<EOL
-AWS_ACCESS_KEY_ID_=abc
-AWS_SECRET_ACCESS_KEY=123
-TF_VAR_terraform_statefile_bucket=k6haze-...
+AWS_ACCESS_KEY_ID_=${local.latest_account_token[each.key].id}
+AWS_SECRET_ACCESS_KEY=${sensitive(sha256(local.latest_account_token[each.key].value))}
+TF_VAR_terraform_statefile_bucket=${cloudflare_r2_bucket.tfstates[each.key].name}
 TF_VAR_terraform_statefile_passphrase=foooo
-TF_VAR_cloudflare_account_id=xyz
+TF_VAR_cloudflare_account_id=${cloudflare_r2_bucket.tfstates[each.key].account_id}
 EOL
     )
     type    = "dotenv" #json, yaml, dotenv, and binary

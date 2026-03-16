@@ -62,6 +62,6 @@ resource "cloudflare_account_token" "beta" {
 
 locals {
   # Choose the latest expiration
-  cloudflare_account_token = timecmp(time_rotating._alpha.rotation_rfc3339, time_rotating._beta.rotation_rfc3339) > 1 ? cloudflare_account_token.alpha : cloudflare_account_token.beta
+  latest_account_token = timecmp(time_rotating._alpha.rotation_rfc3339, time_rotating._beta.rotation_rfc3339) == 1 ? cloudflare_account_token.alpha : cloudflare_account_token.beta
 }
 
