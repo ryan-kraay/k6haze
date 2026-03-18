@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "A list of tools shared between the k6haze development and automatic testing pipelines.",
   "packages": [
-    "kubectl@1.35.0",
+    "kubectl@1.35.2",
     "kubernetes-helm@3.19.1",
     "opentofu@1.11.5",
     "rclone@1.73.2",
