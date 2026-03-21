@@ -65,7 +65,8 @@ EOL
 # A single age key containing ALL our private keys (useful during local development)
 # TODO:  Maybe add an optional filter to _not_ include production
 resource "local_file" "age_key" {
-  filename = "${path.module}/../private-age.key"
+  # Put this at the root of the repo
+  filename = "${path.module}/../../private-age.key"
   content = sensitive(join("\n", flatten([
     for k, v in local.latest_age_keygen : [
       "# ${k}: ${v.output.public}",

@@ -40,5 +40,5 @@ variable "recovery" {
 
 variable "rotation_minutes" {
   description = "The period that keys should be rotated"
-  default     = 10
+  default     = 5
 }
