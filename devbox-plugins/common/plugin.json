@@ -1,6 +1,6 @@
 {
   "name": "k6haze-common",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A list of tools shared between the k6haze development and automatic testing pipelines.",
   "packages": [
     "kubectl@1.35.0",
@@ -17,6 +17,9 @@
     "PATH": "{{ .Virtenv }}/bin:${PATH}"
   },
   "shell": {
+    "init_hook": [
+      "export ENVIRONMENT=\"${ENVIRONMENT:-development}\""
+    ],
     "scripts": {
       "test": [
         // by default shellspec will traverse and find *all* spec files
@@ -29,15 +32,27 @@
         "shellspec \"${PROJECT_ROOT}/terraform/github\"  --format documentation \"${@}\""
       ],
       "k8s-tf": [
+        "set -xa",
+        "source <(read_secrets.sh \"${PROJECT_ROOT}/terraform/k8s/secrets/${ENVIRONMENT}\")",
+        "set +a",
         "tofu -chdir=\"${PROJECT_ROOT}/terraform/k8s\" \"${@}\""
       ],
       "k8s-spec": [
+        "set -xa",
+        "source <(read_secrets.sh \"${PROJECT_ROOT}/terraform/k8s/spec/secrets/${ENVIRONMENT}\")",
+        "set +a",
         "shellspec \"${PROJECT_ROOT}/terraform/k8s\"  --format documentation \"${@}\""
       ],
       "talos-tf": [
+        "set -xa",
+        "source <(read_secrets.sh \"${PROJECT_ROOT}/terraform/talos/secrets/${ENVIRONMENT}\")",
+        "set +a",
         "tofu -chdir=\"${PROJECT_ROOT}/terraform/talos\" \"${@}\""
       ],
       "talos-spec": [
+        "set -xa",
+        "source <(read_secrets.sh \"${PROJECT_ROOT}/terraform/talos/spec/secrets/${ENVIRONMENT}\")",
+        "set +a",
         "shellspec \"${PROJECT_ROOT}/terraform/talos\" --format documentation \"${@}\""
       ]
     }
