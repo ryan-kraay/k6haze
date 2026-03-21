@@ -1,7 +1,7 @@
 resource "local_file" "sops_yaml" {
-  for_each = local.projects
+  for_each = local.age_projects
 
-  filename = "${path.module}/../${each.value.project_name}/secrets/${each.value.environment_name}/.sops.yaml"
+  filename = "${path.module}/../${each.value.project_name}${each.value.relpath}/secrets/${each.value.environment_name}/.sops.yaml"
   content  = <<-EOT
     creation_rules:
       - path_regex: ".sops(.env|.raw)$"
@@ -17,7 +17,7 @@ locals {
 }
 
 resource "terraform_data" "reencrypt_secrets" {
-  for_each = local.projects
+  for_each = local.age_projects
 
   triggers_replace = [
     local.latest_age_keygen[each.key].output.public
@@ -25,7 +25,7 @@ resource "terraform_data" "reencrypt_secrets" {
 
   provisioner "local-exec" {
     # The find-command allows us to gracefully skip, if there are no '*.sops.*' in our destination folder
-    command = "cd ${path.module}/../${each.value.project_name}/secrets/${each.value.environment_name} && find . -maxdepth 1 -name '*.sops.*' ! -name '.sops.yaml' | xargs -r sops updatekeys -y"
+    command = "cd ${path.module}/../${each.value.project_name}${each.value.relpath}/secrets/${each.value.environment_name} && find . -maxdepth 1 -name '*.sops.*' ! -name '.sops.yaml' | xargs -r sops updatekeys -y"
 
     environment = {
       SOPS_AGE_KEY = sensitive(join("\n", values(local.last_decryption_secrets[each.key])))
@@ -36,7 +36,7 @@ resource "terraform_data" "reencrypt_secrets" {
 }
 
 resource "customcrud" "tfstate_secrets" {
-  for_each = local.projects
+  for_each = local.terraform_projects
 
   input = {
     path = "${path.module}/../${each.value.project_name}/secrets/${each.value.environment_name}/tfstate.sops.env"
@@ -49,7 +49,7 @@ TF_VAR_cloudflare_account_id=${cloudflare_r2_bucket.tfstates[each.key].account_i
 EOL
     )
     type    = "dotenv" #json, yaml, dotenv, and binary
-    age_key = local.latest_age_keygen[each.key].output.public
+    age_key = local.latest_age_keygen["${each.key}-terraform"].output.public
   }
 
   hooks {
@@ -62,13 +62,16 @@ EOL
   depends_on = [terraform_data.reencrypt_secrets]
 }
 
+# A single age key containing ALL our private keys (useful during local development)
+# TODO:  Maybe add an optional filter to _not_ include production
 resource "local_file" "age_key" {
-  for_each = local.projects
-
-  filename = "${path.module}/../${each.value.project_name}/secrets/${each.value.environment_name}/age.key"
-  content = sensitive(join("\n", [
-    for slot in values(local.age_keygens) : slot[each.key].output.private
-  ]))
+  filename = "${path.module}/../private-age.key"
+  content = sensitive(join("\n", flatten([
+    for k, v in local.latest_age_keygen : [
+      "# ${k}: ${v.output.public}",
+      v.output.private
+    ]
+  ])))
 
   directory_permission = "0755"
   file_permission      = "0644"

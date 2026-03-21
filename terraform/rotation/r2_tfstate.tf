@@ -8,7 +8,7 @@ data "cloudflare_account_api_token_permission_groups_list" "r2" {
 }
 
 resource "cloudflare_r2_bucket" "tfstates" {
-  for_each   = toset(keys(local.projects))
+  for_each   = toset(keys(local.terraform_projects))
   account_id = local.cloudflare_account_id
   name       = "k6haze-${each.key}-tfstate"
   location   = "WEUR"

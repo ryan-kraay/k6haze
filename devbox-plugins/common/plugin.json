@@ -12,7 +12,9 @@
     "yq-go@4.52.4",
   ],
   "env": {
-    "PROJECT_ROOT": "{{.DevboxProjectDir}}"
+    "PROJECT_ROOT": "{{.DevboxProjectDir}}",
+    // Add our read_secrets.sh script to the path
+    "PATH": "{{ .Virtenv }}/bin:${PATH}"
   },
   "shell": {
     "scripts": {

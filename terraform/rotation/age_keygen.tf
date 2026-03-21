@@ -1,8 +1,8 @@
 ##
-## Each bucket will have it's own AGE key
+## Each sub-project will have it's own AGE key
 ##
 resource "customcrud" "age_keygen_alpha" {
-  for_each = cloudflare_r2_bucket.tfstates
+  for_each = toset(keys(local.age_projects))
 
   hooks {
     create = "${path.module}/scripts/age-keygen.sh"
@@ -21,7 +21,7 @@ resource "customcrud" "age_keygen_alpha" {
 }
 
 resource "customcrud" "age_keygen_beta" {
-  for_each = cloudflare_r2_bucket.tfstates
+  for_each = toset(keys(local.age_projects))
 
   hooks {
     create = "${path.module}/scripts/age-keygen.sh"
