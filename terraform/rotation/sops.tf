@@ -44,7 +44,6 @@ resource "customcrud" "tfstate_secrets" {
 AWS_ACCESS_KEY_ID_=${local.latest_account_token[each.key].id}
 AWS_SECRET_ACCESS_KEY=${sensitive(sha256(local.latest_account_token[each.key].value))}
 TF_VAR_terraform_statefile_bucket=${cloudflare_r2_bucket.tfstates[each.key].name}
-TF_VAR_terraform_statefile_passphrase=foooo
 TF_VAR_cloudflare_account_id=${cloudflare_r2_bucket.tfstates[each.key].account_id}
 EOL
     )
