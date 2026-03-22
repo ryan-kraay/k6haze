@@ -26,7 +26,7 @@ variable "project_names" {
   description = "The names of the projects, which should match /terraform/<project_name>.  ie (talos, k8s, etc)"
   type        = list(string)
   nullable    = false
-  default     = ["talos"]
+  default     = ["talos", "k8s"]
 }
 
 variable "recovery" {

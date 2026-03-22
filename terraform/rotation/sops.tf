@@ -13,7 +13,12 @@ resource "local_file" "sops_yaml" {
 }
 
 locals {
-  last_decryption_secrets = var.recovery != null ? var.recovery : local.age_private_keys
+  # We need to normalize local.age_private_keys from objects to maps
+  #  This makes the conditional between var.recovery and local.age_private_keys
+  #  more resiliant to changes in the structure of local.age_private_keys
+  last_decryption_secrets = var.recovery != null ? var.recovery : {
+    for k, v in local.age_private_keys : k => tomap(v)
+  }
 }
 
 resource "terraform_data" "reencrypt_secrets" {
