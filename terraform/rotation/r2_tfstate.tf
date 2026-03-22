@@ -30,6 +30,8 @@ resource "cloudflare_account_token" "alpha" {
     })
   }]
 
+  # TODO:  This should actually be 125% of the var.rotation_minutes
+  #   or just some additional fixed period of time
   expires_on = time_rotating._alpha.rotation_rfc3339
 
   lifecycle {
@@ -53,6 +55,8 @@ resource "cloudflare_account_token" "beta" {
     })
   }]
 
+  # TODO:  This should actually be 125% of the var.rotation_minutes
+  #   or just some additional fixed period of time
   expires_on = time_rotating._beta.rotation_rfc3339
 
   lifecycle {

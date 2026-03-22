@@ -19,7 +19,7 @@ variable "environment_names" {
     error_message = "The list must not contain empty strings."
   }
 
-  default = ["production"]
+  default = ["development"]
 }
 
 variable "project_names" {

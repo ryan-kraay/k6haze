@@ -32,25 +32,25 @@
         "shellspec \"${PROJECT_ROOT}/terraform/github\"  --format documentation \"${@}\""
       ],
       "k8s-tf": [
-        "set -xa",
+        "set -ea",
         "source <(read_secrets.sh \"${PROJECT_ROOT}/terraform/k8s/secrets/${ENVIRONMENT}\")",
         "set +a",
         "tofu -chdir=\"${PROJECT_ROOT}/terraform/k8s\" \"${@}\""
       ],
       "k8s-spec": [
-        "set -xa",
+        "set -ea",
         "source <(read_secrets.sh \"${PROJECT_ROOT}/terraform/k8s/spec/secrets/${ENVIRONMENT}\")",
         "set +a",
         "shellspec \"${PROJECT_ROOT}/terraform/k8s\"  --format documentation \"${@}\""
       ],
       "talos-tf": [
-        "set -xa",
+        "set -ea",
         "source <(read_secrets.sh \"${PROJECT_ROOT}/terraform/talos/secrets/${ENVIRONMENT}\")",
         "set +a",
         "tofu -chdir=\"${PROJECT_ROOT}/terraform/talos\" \"${@}\""
       ],
       "talos-spec": [
-        "set -xa",
+        "set -ea",
         "source <(read_secrets.sh \"${PROJECT_ROOT}/terraform/talos/spec/secrets/${ENVIRONMENT}\")",
         "set +a",
         "shellspec \"${PROJECT_ROOT}/terraform/talos\" --format documentation \"${@}\""
