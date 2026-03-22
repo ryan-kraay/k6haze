@@ -24,7 +24,7 @@ terraform {
     # Necessary to decrypt local secrets
     sops = {
       source  = "carlpett/sops"
-      version = "1.4.0"
+      version = "1.4.1"
     }
     # necessary to modify our gitrepo
     github = {
