@@ -14,6 +14,7 @@ locals {
   #  specs from terraform.
   terraform_projects = local._projects
   spec_projects      = local._projects
+  github_projects    = local._projects
 
   # All the projects that need AGE keys
   age_projects = merge(

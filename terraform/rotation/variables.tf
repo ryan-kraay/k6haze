@@ -22,6 +22,15 @@ variable "environment_names" {
   default = ["development"]
 }
 
+variable "github_owner_slug" {
+  description = "The 'owner/organization' can be extracted from the url: ie https://github.com/:owner_slug/:repo_name"
+}
+
+variable "github_repo_name" {
+  description = "The Github repo name to apply our changes to."
+  default     = "k6haze"
+}
+
 variable "project_names" {
   description = "The names of the projects, which should match /terraform/<project_name>.  ie (talos, k8s, etc)"
   type        = list(string)
