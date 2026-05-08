@@ -105,7 +105,7 @@ jobs:
         uses: jetify-com/devbox-install-action@8c6a66ed6273138b1915457069de78cb52fe3bd7 # v0.15.0
         with:
           enable-cache: 'true'
-          devbox-version: "0.17.1"
+          devbox-version: "0.17.2"
           project-path: ".github/"
 
       - name: Create Wrapper
