@@ -197,51 +197,51 @@
       "last_modified": "2025-10-08T10:03:27Z",
       "resolved": "github:NixOS/nixpkgs/fb5cf53218b987f2703a5bbc292a030c0fe33443?lastModified=1759917807&narHash=sha256-WoSazth5EXIJmveWf0zbTMycrgpbLYOth6KhmltMuv0%3D"
     },
-    "gitsign@0.14.0": {
-      "last_modified": "2026-01-30T02:32:49Z",
-      "resolved": "github:NixOS/nixpkgs/6308c3b21396534d8aaeac46179c14c439a89b8a#gitsign",
+    "gitsign@0.16.0": {
+      "last_modified": "2026-05-11T00:16:55Z",
+      "resolved": "github:NixOS/nixpkgs/c6e5ca3c836a5f4dd9af9f2c1fc1c38f0fac988a#gitsign",
       "source": "devbox-search",
-      "version": "0.14.0",
+      "version": "0.16.0",
       "systems": {
         "aarch64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/akazj50zz0gqrfihrp8bdfxsnpig09sj-gitsign-0.14.0",
+              "path": "/nix/store/k30cywvr6ns9l7y632cj4hdxa0v7l5im-gitsign-0.16.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/akazj50zz0gqrfihrp8bdfxsnpig09sj-gitsign-0.14.0"
+          "store_path": "/nix/store/k30cywvr6ns9l7y632cj4hdxa0v7l5im-gitsign-0.16.0"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/0r20vgn620xq4h54fk9fvl5ydq28p1kv-gitsign-0.14.0",
+              "path": "/nix/store/1rix2vjf00xsbl31ri7wi0yix47l7qjm-gitsign-0.16.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/0r20vgn620xq4h54fk9fvl5ydq28p1kv-gitsign-0.14.0"
+          "store_path": "/nix/store/1rix2vjf00xsbl31ri7wi0yix47l7qjm-gitsign-0.16.0"
         },
         "x86_64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/5z3lc0kf3h941d6fiav4q7i7y7pjlhy4-gitsign-0.14.0",
+              "path": "/nix/store/whaz1frm4xdpk9qiaz38l73f9cjr10qg-gitsign-0.16.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/5z3lc0kf3h941d6fiav4q7i7y7pjlhy4-gitsign-0.14.0"
+          "store_path": "/nix/store/whaz1frm4xdpk9qiaz38l73f9cjr10qg-gitsign-0.16.0"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/cyrb7b83s3l8mczq8ssvhmyvvgrpzhla-gitsign-0.14.0",
+              "path": "/nix/store/84p45m0cgxjllssbnsvi55y61ll8rav7-gitsign-0.16.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/cyrb7b83s3l8mczq8ssvhmyvvgrpzhla-gitsign-0.14.0"
+          "store_path": "/nix/store/84p45m0cgxjllssbnsvi55y61ll8rav7-gitsign-0.16.0"
         }
       }
     },
