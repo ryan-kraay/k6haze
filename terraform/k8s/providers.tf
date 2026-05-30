@@ -18,11 +18,11 @@ terraform {
   required_providers {
     helm = {
       source  = "hashicorp/helm"
-      version = "3.1.1"
+      version = "3.1.2"
     }
     tls = {
       source  = "hashicorp/tls"
-      version = "4.2.1"
+      version = "4.3.0"
     }
   }
 }
