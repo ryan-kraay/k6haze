@@ -6,9 +6,9 @@
     "kubectl@1.36.1",
     "kubernetes-helm@3.20.2",
     "opentofu@1.11.8",
-    "rclone@1.73.5",
+    "rclone@1.74.2",
     "shellspec@0.28.1",
-    "talosctl@1.13.0",
+    "talosctl@1.13.2",
     "yq-go@4.53.2",
   ],
   "env": {
