@@ -7,7 +7,7 @@
     "sops@3.13.1",
     "hubble@1.19.3",
     "cilium-cli@0.19.2",
-    "fluxcd@2.8.6",
+    "fluxcd@2.8.7",
   ],
   "env": {
     // avoid the need to choose our oauth when using sigstore
