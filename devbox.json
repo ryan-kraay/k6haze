@@ -5,7 +5,7 @@
     "cosign@3.0.6",
     "gitsign@0.16.0",
     "sops@3.13.1",
-    "hubble@1.19.3",
+    "hubble@1.19.4",
     "cilium-cli@0.19.2",
     "fluxcd@2.8.8",
   ],
