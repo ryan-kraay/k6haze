@@ -135,51 +135,41 @@
         }
       }
     },
-    "fluxcd@2.9.0": {
-      "last_modified": "2026-07-04T17:57:37Z",
-      "resolved": "github:NixOS/nixpkgs/19a8a1e6d8b7315b6fd84e5a51977ce6f69d5a5b#fluxcd",
+    "fluxcd@2.9.2": {
+      "last_modified": "2026-07-23T05:10:05Z",
+      "resolved": "github:NixOS/nixpkgs/7525d999cd850b9a488817abc89c75dc733acf17#fluxcd",
       "source": "devbox-search",
-      "version": "2.9.0",
+      "version": "2.9.2",
       "systems": {
         "aarch64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/k7jligrbmi9lfd9f08ranz7qz8brd2y4-fluxcd-2.9.0",
+              "path": "/nix/store/qqas2is58na0ypv98y1r43r359qz6kj1-fluxcd-2.9.2",
               "default": true
             }
           ],
-          "store_path": "/nix/store/k7jligrbmi9lfd9f08ranz7qz8brd2y4-fluxcd-2.9.0"
+          "store_path": "/nix/store/qqas2is58na0ypv98y1r43r359qz6kj1-fluxcd-2.9.2"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/xbrim51svq8d38d4y8ryijzlxsh4z5w6-fluxcd-2.9.0",
+              "path": "/nix/store/7hdhyd4y80r1mipxfwr3p4l8n92wdmx5-fluxcd-2.9.2",
               "default": true
             }
           ],
-          "store_path": "/nix/store/xbrim51svq8d38d4y8ryijzlxsh4z5w6-fluxcd-2.9.0"
-        },
-        "x86_64-darwin": {
-          "outputs": [
-            {
-              "name": "out",
-              "path": "/nix/store/3cwixfyb1g43sq08b2ja5v1vh8776srh-fluxcd-2.9.0",
-              "default": true
-            }
-          ],
-          "store_path": "/nix/store/3cwixfyb1g43sq08b2ja5v1vh8776srh-fluxcd-2.9.0"
+          "store_path": "/nix/store/7hdhyd4y80r1mipxfwr3p4l8n92wdmx5-fluxcd-2.9.2"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/4wrmjwdk958x9282q7a91h2w9k1yb1bp-fluxcd-2.9.0",
+              "path": "/nix/store/fal5zf1j4rhnnc96wbrqxc1xb4iz77ad-fluxcd-2.9.2",
               "default": true
             }
           ],
-          "store_path": "/nix/store/4wrmjwdk958x9282q7a91h2w9k1yb1bp-fluxcd-2.9.0"
+          "store_path": "/nix/store/fal5zf1j4rhnnc96wbrqxc1xb4iz77ad-fluxcd-2.9.2"
         }
       }
     },
@@ -627,51 +617,51 @@
         }
       }
     },
-    "talosctl@1.13.2": {
-      "last_modified": "2026-05-22T01:51:30Z",
-      "resolved": "github:NixOS/nixpkgs/6dedf69f94d03cbe7bdde106f2d4c23ae2a853bf#talosctl",
+    "talosctl@1.13.5": {
+      "last_modified": "2026-07-23T05:10:05Z",
+      "resolved": "github:NixOS/nixpkgs/7525d999cd850b9a488817abc89c75dc733acf17#talosctl",
       "source": "devbox-search",
-      "version": "1.13.2",
+      "version": "1.13.5",
       "systems": {
         "aarch64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/f8ih4dk3zwc8fnv141a8kq48d9r4m2x6-talosctl-1.13.2",
+              "path": "/nix/store/wj7idjfkz83hgmf2bs2l52i8n98m6v1q-talosctl-1.13.5",
               "default": true
             }
           ],
-          "store_path": "/nix/store/f8ih4dk3zwc8fnv141a8kq48d9r4m2x6-talosctl-1.13.2"
+          "store_path": "/nix/store/wj7idjfkz83hgmf2bs2l52i8n98m6v1q-talosctl-1.13.5"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/bxz7mkqf770niizl9rpz1gc5wp2h56gn-talosctl-1.13.2",
+              "path": "/nix/store/4jpp81g4zlyb2prxkcpbv7xbyyqsxiy8-talosctl-1.13.5",
               "default": true
             }
           ],
-          "store_path": "/nix/store/bxz7mkqf770niizl9rpz1gc5wp2h56gn-talosctl-1.13.2"
+          "store_path": "/nix/store/4jpp81g4zlyb2prxkcpbv7xbyyqsxiy8-talosctl-1.13.5"
         },
         "x86_64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/adnrnj3rp0d0ziff6npc0qzxaipgzb9r-talosctl-1.13.2",
+              "path": "/nix/store/lv4kn8i8fkpgbsl11d1xvv2h037gkyj7-talosctl-1.13.5",
               "default": true
             }
           ],
-          "store_path": "/nix/store/adnrnj3rp0d0ziff6npc0qzxaipgzb9r-talosctl-1.13.2"
+          "store_path": "/nix/store/lv4kn8i8fkpgbsl11d1xvv2h037gkyj7-talosctl-1.13.5"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/f3csq9wcjn95rsspk8snrgnb9rds2zxm-talosctl-1.13.2",
+              "path": "/nix/store/7c0ncypdnhdcizsf06af24kbybkj8h8f-talosctl-1.13.5",
               "default": true
             }
           ],
-          "store_path": "/nix/store/f3csq9wcjn95rsspk8snrgnb9rds2zxm-talosctl-1.13.2"
+          "store_path": "/nix/store/7c0ncypdnhdcizsf06af24kbybkj8h8f-talosctl-1.13.5"
         }
       }
     },
