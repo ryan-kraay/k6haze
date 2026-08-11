@@ -2,5 +2,5 @@ apiVersion: v2
 name: cilium-config
 description: Cilium network policies and configuration for k6haze cluster
 type: application
-version: 0.1.3
+version: 0.1.4
 appVersion: "1.0"

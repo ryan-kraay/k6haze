@@ -1,0 +1,28 @@
+---
+apiVersion: "cilium.io/v2"
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: deny-untrusted-clusterwide
+  annotations:
+    description: "Cluster-wide policy to deny ingress from untrusted sources and external world traffic to all pods/services"
+spec:
+  # Apply to ALL pods cluster-wide EXCEPT API gateway
+  endpointSelector:
+    matchExpressions:
+    - key: "io.cilium.gateway/owning-gateway"
+      operator: DoesNotExist
+  
+  # Deny ingress from untrusted sources OR world
+  ingressDeny:
+  - fromEndpoints:
+    - matchLabels:
+        "k6haze.security.level": "untrusted"  # Used to mock "world" traffic in tests
+    toPorts:
+    - ports:
+      - port: "1"
+        endPort: 52      # Allow DNS on port 53 for name resolution
+    - ports:
+      - port: "54"
+        endPort: 65535   # Allow DNS on port 53 for name resolution
+  - fromEntities:
+    - "world"
