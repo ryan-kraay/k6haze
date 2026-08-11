@@ -79,6 +79,11 @@ resource "github_repository_environment" "environments" {
 
   environment = each.value
   repository  = var.github_repo_name
+
+  lifecycle {
+    # Migrated into terraform/rotation
+    prevent_destroy = true
+  }
 }
 
 resource "github_actions_environment_secret" "encrypted_secrets" {
