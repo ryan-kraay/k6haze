@@ -49,41 +49,41 @@
         }
       }
     },
-    "cilium-cli@0.19.6": {
-      "last_modified": "2026-07-16T04:38:10Z",
-      "resolved": "github:NixOS/nixpkgs/6368bc923cec55a5f78960ade0cb4dd99580e087#cilium-cli",
+    "cilium-cli@0.19.7": {
+      "last_modified": "2026-08-01T16:34:20Z",
+      "resolved": "github:NixOS/nixpkgs/a5cbcfe954791221bfffe2307f7d1a1bf61a871e#cilium-cli",
       "source": "devbox-search",
-      "version": "0.19.6",
+      "version": "0.19.7",
       "systems": {
         "aarch64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/3p1yllhj2lynx0sq7lvfw451nvza64n6-cilium-cli-0.19.6",
+              "path": "/nix/store/phfhizm4vh6s75l7ydgikq7d1ydpxpr5-cilium-cli-0.19.7",
               "default": true
             }
           ],
-          "store_path": "/nix/store/3p1yllhj2lynx0sq7lvfw451nvza64n6-cilium-cli-0.19.6"
+          "store_path": "/nix/store/phfhizm4vh6s75l7ydgikq7d1ydpxpr5-cilium-cli-0.19.7"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/23nyscs8hk8yx7sai6n44l4msddcsavk-cilium-cli-0.19.6",
+              "path": "/nix/store/34bgsz5ri4izjhxfahm6pwzz1bwynbf2-cilium-cli-0.19.7",
               "default": true
             }
           ],
-          "store_path": "/nix/store/23nyscs8hk8yx7sai6n44l4msddcsavk-cilium-cli-0.19.6"
+          "store_path": "/nix/store/34bgsz5ri4izjhxfahm6pwzz1bwynbf2-cilium-cli-0.19.7"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/rq9yv1b9gwp3m60xba2l5g9a9z5vdjn5-cilium-cli-0.19.6",
+              "path": "/nix/store/iydkr8gxya78002zkmgwj6aizm9fl651-cilium-cli-0.19.7",
               "default": true
             }
           ],
-          "store_path": "/nix/store/rq9yv1b9gwp3m60xba2l5g9a9z5vdjn5-cilium-cli-0.19.6"
+          "store_path": "/nix/store/iydkr8gxya78002zkmgwj6aizm9fl651-cilium-cli-0.19.7"
         }
       }
     },
