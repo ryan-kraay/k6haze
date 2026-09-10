@@ -5,7 +5,7 @@
   "packages": [
     "kubectl@1.36.1",
     "kubernetes-helm@3.20.2",
-    "opentofu@1.12.1",
+    "opentofu@1.12.5",
     "rclone@1.74.2",
     "shellspec@0.28.1",
     "talosctl@1.13.5",
