@@ -82,7 +82,7 @@ resource "helm_release" "flux_homelab" {
   name       = "homelab"
   repository = "https://fluxcd-community.github.io/helm-charts"
   chart      = "flux2-sync"
-  version    = "1.14.6"
+  version    = "1.15.0"
 
   namespace        = local.flux_namespace
   create_namespace = false
