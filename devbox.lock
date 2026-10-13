@@ -205,51 +205,41 @@
         }
       }
     },
-    "hubble@1.19.4": {
-      "last_modified": "2026-06-08T15:01:26Z",
-      "resolved": "github:NixOS/nixpkgs/8c3cede7ddc26bd659d2d383b5610efbd2c7a16e#hubble",
+    "hubble@1.20.2": {
+      "last_modified": "2026-10-08T19:21:32Z",
+      "resolved": "github:NixOS/nixpkgs/8edc0c72e3a38faf5434e40d1f19431125fe4b30#hubble",
       "source": "devbox-search",
-      "version": "1.19.4",
+      "version": "1.20.2",
       "systems": {
         "aarch64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/p76yf3jlp7qbxvv6b7kvva8fhz7hani0-hubble-1.19.4",
+              "path": "/nix/store/6j8kqwzxqsayv1nqq8wicbp09f069a4m-hubble-1.20.2",
               "default": true
             }
           ],
-          "store_path": "/nix/store/p76yf3jlp7qbxvv6b7kvva8fhz7hani0-hubble-1.19.4"
+          "store_path": "/nix/store/6j8kqwzxqsayv1nqq8wicbp09f069a4m-hubble-1.20.2"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/a1hfz9gcml7513l0g2rjzdsiry72y78i-hubble-1.19.4",
+              "path": "/nix/store/bv367yj9ijkaiyw4317ga9qv7fvaaqj0-hubble-1.20.2",
               "default": true
             }
           ],
-          "store_path": "/nix/store/a1hfz9gcml7513l0g2rjzdsiry72y78i-hubble-1.19.4"
-        },
-        "x86_64-darwin": {
-          "outputs": [
-            {
-              "name": "out",
-              "path": "/nix/store/bfcf4js9nyib0fmgwv4fn0lmm4zf3qm8-hubble-1.19.4",
-              "default": true
-            }
-          ],
-          "store_path": "/nix/store/bfcf4js9nyib0fmgwv4fn0lmm4zf3qm8-hubble-1.19.4"
+          "store_path": "/nix/store/bv367yj9ijkaiyw4317ga9qv7fvaaqj0-hubble-1.20.2"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/fk7vlhky0035ypkfbr2pcf7y71xh34j4-hubble-1.19.4",
+              "path": "/nix/store/wip90s0g4kyipdr2y3ycis4g2lkm2iwd-hubble-1.20.2",
               "default": true
             }
           ],
-          "store_path": "/nix/store/fk7vlhky0035ypkfbr2pcf7y71xh34j4-hubble-1.19.4"
+          "store_path": "/nix/store/wip90s0g4kyipdr2y3ycis4g2lkm2iwd-hubble-1.20.2"
         }
       }
     },
