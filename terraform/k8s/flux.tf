@@ -44,7 +44,7 @@ resource "helm_release" "flux" {
   name       = "fluxcd-community"
   repository = "https://fluxcd-community.github.io/helm-charts"
   chart      = "flux2"
-  version    = "2.19.0"
+  version    = "2.19.1"
 
   namespace        = local.flux_namespace
   create_namespace = false
