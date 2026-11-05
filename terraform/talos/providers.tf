@@ -18,7 +18,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "6.69.0"
+      version = "6.72.0"
     }
     talos = {
       source  = "siderolabs/talos"
