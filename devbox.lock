@@ -167,41 +167,41 @@
       "last_modified": "2025-10-08T10:03:27Z",
       "resolved": "github:NixOS/nixpkgs/fb5cf53218b987f2703a5bbc292a030c0fe33443?lastModified=1759917807&narHash=sha256-WoSazth5EXIJmveWf0zbTMycrgpbLYOth6KhmltMuv0%3D"
     },
-    "gitsign@0.17.1": {
-      "last_modified": "2026-08-10T07:49:06Z",
-      "resolved": "github:NixOS/nixpkgs/d482ef84049d9b7276b83a06e4e4d76983830097#gitsign",
+    "gitsign@0.18.0": {
+      "last_modified": "2026-11-16T14:48:49Z",
+      "resolved": "github:NixOS/nixpkgs/e21fec321d73511849707a7585e4ea155ee4bf40#gitsign",
       "source": "devbox-search",
-      "version": "0.17.1",
+      "version": "0.18.0",
       "systems": {
         "aarch64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/dzqvzas47yllrv89m8jgjdr6l3h0gazm-gitsign-0.17.1",
+              "path": "/nix/store/8dkm48dvj2f2p7xwvh9qlq4mps16c1dl-gitsign-0.18.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/dzqvzas47yllrv89m8jgjdr6l3h0gazm-gitsign-0.17.1"
+          "store_path": "/nix/store/8dkm48dvj2f2p7xwvh9qlq4mps16c1dl-gitsign-0.18.0"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/l4pys2dlyhs47z8wm087jz9a81vrx5m1-gitsign-0.17.1",
+              "path": "/nix/store/7ij45nc7j1f1l0a3k8r9g6hv9b5i0n0h-gitsign-0.18.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/l4pys2dlyhs47z8wm087jz9a81vrx5m1-gitsign-0.17.1"
+          "store_path": "/nix/store/7ij45nc7j1f1l0a3k8r9g6hv9b5i0n0h-gitsign-0.18.0"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/2g0m5v7v9g8sm9dinhz33ygi6j8ps8ag-gitsign-0.17.1",
+              "path": "/nix/store/ncmim92ysfsxlbvfmfk220w0mavh0ai6-gitsign-0.18.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/2g0m5v7v9g8sm9dinhz33ygi6j8ps8ag-gitsign-0.17.1"
+          "store_path": "/nix/store/ncmim92ysfsxlbvfmfk220w0mavh0ai6-gitsign-0.18.0"
         }
       }
     },
